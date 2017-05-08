@@ -1,0 +1,1097 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using System.Reflection;
+
+namespace PKIKeyRecovery
+{
+    public class Configuration
+    {
+        const string confFileName = "KRtool.conf";
+        //const string ver = "0.9.0.a";
+
+        #region Attribute Declarations
+
+        public bool conf_valid,
+                    mail_valid,
+                    pc_keyRetrievalLocationDefined,
+                    mobile_keyRetrievalLocationDefined,
+                    legal_keyRetrievalLocationDefined,
+                    pc_displayPasswordOnScreen,
+                    pc_displayPasswordOnScreenGLOBAL,
+                    mobile_displayPasswordOnScreen,
+                    mobile_displayPasswordOnScreenGLOBAL,
+                    legal_displayPasswordOnScreen,
+                    pc_attachKeyToEmail,
+                    mobile_attachKeyToEmail,
+                    legal_attachKeyToEmail,
+                    pc_deleteKeyAfterSending,
+                    pc_deleteKeyAfterSendingGLOBAL,
+                    mobile_deleteKeyAfterSending,
+                    mobile_deleteKeyAfterSendingGLOBAL,
+                    legal_deleteKeyAfterSending,
+                    pc_strongPasswords,
+                    mobile_strongPasswords,
+                    legal_strongPasswords,
+                    mobileTemplateDefined,
+                    mobile_MessageDefined,
+                    pc_valid,
+                    legal_valid,
+                    mobile_valid;
+
+        private bool mobile_displayPasswordOnScreenDefined,
+                     mobile_attachKeyToEmailDefined,
+                     mobile_deleteKeyAfterSendingDefined,
+                     mobile_strongPasswordsDefined,
+                     legal_displayPasswordOnScreenDefined,
+                     legal_attachKeyToEmailDefined,
+                     legal_deleteKeyAfterSendingDefined,
+                     legal_strongPasswordsDefined,
+                     pc_messageDefined,
+                     mobile_messageDefined,
+                     legal_messageDefined;
+
+        public string CA,
+                      ADdomain,
+                      ADscopeDN,
+                      mailHost,
+                      fromAddress,
+                      legal_email,
+                      pc_MessageBody,
+                      legal_MessageBody,
+                      logLevel,
+                      workingDirectory,
+                      pc_keyRetrievalLocation,
+                      mobile_keyRetrievalLocation,
+                      legal_keyRetrievalLocation,
+                      mobileTemplate,
+                      mobile_MessageBody;
+
+        public static string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        /* private string passwordDistributionMethod,
+                       attachKeyToEmailSelection,
+                       deleteKeyAfterSendingSelection; */
+
+        private bool artifactsFound;
+
+        public List<string> templates;
+        private List<Artifact> confFileArtifacts;
+
+        public Log log;
+
+        #endregion
+
+        #region Constructor
+
+        public Configuration()
+        {
+
+            string pc_passwordDistributionMethod,
+                   mobile_passwordDistributionMethod,
+                   legal_passwordDistributionMethod,
+                   pc_attachKeyToEmailSelection,
+                   mobile_attachKeyToEmailSelection,
+                   legal_attachKeyToEmailSelection,
+                   pc_deleteKeyAfterSendingSelection,
+                   pc_useStrongPasswordsSelection,
+                   mobile_useStrongPasswordsSelection,
+                   legal_useStrongPasswordsSelection,
+                   mobile_deleteKeyAfterSendingSelection,
+                   legal_deleteKeyAfterSendingSelection,
+                   pc_messageFile,
+                   mobile_messageFile,
+                   legal_messageFile,
+                   logFile;
+
+            bool pc_emailSettingsValid,
+                 legal_emailSettingsValid,
+                 mobile_emailSettingsValid;
+
+            //Attribute definitions
+            CA = "";
+            ADdomain = "";
+            ADscopeDN = "";
+            mailHost = "";
+            fromAddress = "";
+            legal_email = "";
+            pc_MessageBody = "";
+            legal_MessageBody = "";
+            logLevel = "";
+            workingDirectory = "";
+            pc_keyRetrievalLocation = "";
+            mobile_keyRetrievalLocation = "";
+            legal_keyRetrievalLocation = "";
+            mobile_MessageBody = "";
+            pc_messageFile = "";
+            legal_messageFile = "";
+            mobile_messageFile = "";
+            int index = 0;
+
+            Artifact artifact;
+
+            conf_valid = true;
+            mail_valid = true;
+            pc_keyRetrievalLocationDefined = false;
+            mobile_keyRetrievalLocationDefined = false;
+            pc_displayPasswordOnScreen = true;
+            pc_displayPasswordOnScreenGLOBAL = true;
+            mobile_displayPasswordOnScreen = true;
+            mobile_displayPasswordOnScreenGLOBAL = true;
+            legal_displayPasswordOnScreen = true;
+            pc_attachKeyToEmail = true;
+            mobile_attachKeyToEmail = true;
+            legal_attachKeyToEmail = true;
+            pc_deleteKeyAfterSending = false;
+            pc_deleteKeyAfterSendingGLOBAL = false;
+            mobile_deleteKeyAfterSending = false;
+            mobile_deleteKeyAfterSendingGLOBAL = false;
+            legal_deleteKeyAfterSending = false;
+            pc_strongPasswords = true;
+            mobile_strongPasswords = true;
+            legal_strongPasswords = true;
+            mobileTemplateDefined = false;
+            mobile_MessageDefined = false;
+            mobile_displayPasswordOnScreenDefined = false;
+            mobile_attachKeyToEmailDefined = false;
+            mobile_deleteKeyAfterSendingDefined = false;
+            mobile_strongPasswordsDefined = false;
+            legal_messageDefined = false;
+            pc_messageDefined = false;
+            pc_valid = true;
+            legal_valid = true;
+            mobile_valid = true;
+            pc_emailSettingsValid = true;
+            legal_emailSettingsValid = true;
+            mobile_emailSettingsValid = true;
+
+            string confIdentifier;
+            TextReader tr;
+            List<string> confFile = stdlib.ReadFile(confFileName);
+
+            artifactsFound = false;
+            confFileArtifacts = new List<Artifact>();
+            templates = new List<String>();
+            String[] tmp;
+            templates = new List<string>();
+
+            pc_passwordDistributionMethod = "byemail";
+            mobile_passwordDistributionMethod = "byemail";
+            legal_passwordDistributionMethod = "byemail";
+            pc_attachKeyToEmailSelection = "false";
+            mobile_attachKeyToEmailSelection = "true";
+            legal_attachKeyToEmailSelection = "false";
+            pc_deleteKeyAfterSendingSelection = "false";
+            mobile_deleteKeyAfterSendingSelection = "false";
+            legal_deleteKeyAfterSendingSelection = "false";
+            logFile = Directory.GetCurrentDirectory() + @"\KRTool.log";
+
+            if (confFile == null)
+            {
+                conf_valid = false;
+                return;
+            }
+            else
+            {
+                #region Read Configuration File
+
+                foreach (string record in confFile)
+                {
+                    index++;
+                    try
+                    {
+                        if ((record.IndexOf("#") != 0) & (record != ""))
+                        {
+                            if (record.Split(' ').Length < 2)
+                                throw new Exception();
+
+                            confIdentifier = stdlib.Split(record, ' ', 0).Trim().ToLower();
+
+                            switch (confIdentifier)
+                            {
+                                case "ca":
+                                    CA = "\"" + record.Substring(record.IndexOf(' ') + 1).Trim().Replace("`","").Replace("'","") + "\"";
+                                    break;
+                                case "template":
+                                    tmp = record.Split(' ');
+                                    templates.Add(tmp[1].Trim() + "," + tmp[2].Trim());
+                                    break;
+                                case "domain":
+                                    ADdomain = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "adcontainerdn":
+                                    ADscopeDN = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "loglevel":
+                                    logLevel = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "legal_email":
+                                    legal_email = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "pc_message":
+                                    pc_messageFile = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    pc_messageDefined = true;
+                                    /*tr = new StreamReader(record.Substring(record.IndexOf(' ') + 1).Trim());
+                                    userMessageBody = tr.ReadToEnd(); */
+                                    break;
+                                case "legal_message":
+                                    legal_messageFile = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    legal_messageDefined = true;
+                                    /*tr = new StreamReader(record.Substring(record.IndexOf(' ') + 1).Trim());
+                                    legalDiscoveryMessageBody = tr.ReadToEnd(); */
+                                    break;
+                                case "mailhost":
+                                    mailHost = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "mailsender":
+                                    fromAddress = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                    break;
+                                case "pc_passworddistributionmethod":
+                                    pc_passwordDistributionMethod = record.Substring(record.IndexOf(' ') + 1).Trim().Replace(" ", String.Empty).ToLower();
+                                    if (pc_passwordDistributionMethod == "byemail")
+                                    {
+                                        pc_displayPasswordOnScreen = false;
+                                        pc_displayPasswordOnScreenGLOBAL = false;
+                                    }
+                                    else
+                                    {
+                                        if (pc_passwordDistributionMethod != "onscreen")
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+                                case "mobile_passworddistributionmethod":
+                                    mobile_passwordDistributionMethod = record.Substring(record.IndexOf(' ') + 1).Trim().Replace(" ", String.Empty).ToLower();
+                                    if (mobile_passwordDistributionMethod == "byemail")
+                                    {
+                                        mobile_displayPasswordOnScreenDefined = true;
+                                        mobile_displayPasswordOnScreen = false;
+                                        mobile_displayPasswordOnScreenGLOBAL = false;
+                                    }
+                                    else
+                                    {
+                                        if (mobile_passwordDistributionMethod == "onscreen")
+                                        {
+                                            mobile_displayPasswordOnScreenDefined = true;
+                                            mobile_displayPasswordOnScreen = true;
+                                            mobile_displayPasswordOnScreenGLOBAL = true;
+                                        }
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "legal_passworddistributionmethod":
+                                    legal_passwordDistributionMethod = record.Substring(record.IndexOf(' ') + 1).Trim().Replace(" ", String.Empty).ToLower();
+                                    if (legal_passwordDistributionMethod == "byemail")
+                                    {
+                                        legal_displayPasswordOnScreenDefined = true;
+                                        legal_displayPasswordOnScreen = false;
+                                    }
+                                    else
+                                    {
+                                        if (legal_passwordDistributionMethod == "onscreen")
+                                        {
+                                            legal_displayPasswordOnScreenDefined = true;
+                                            legal_displayPasswordOnScreen = true;
+                                        }
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+                                case "pc_attachkeytoemail":
+                                    pc_attachKeyToEmailSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (pc_attachKeyToEmailSelection == "true")
+                                        pc_attachKeyToEmail = true;
+                                    else
+                                    {
+                                        if (pc_attachKeyToEmailSelection == "false")
+                                            pc_attachKeyToEmail = false;
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "legal_attachkeytoemail":
+                                    legal_attachKeyToEmailSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (legal_attachKeyToEmailSelection == "true")
+                                        legal_attachKeyToEmail = true;
+                                    else
+                                    {
+                                        if (legal_attachKeyToEmailSelection == "false")
+                                            legal_attachKeyToEmail = false;
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "mobile_attachkeytoemail":
+                                    mobile_attachKeyToEmailSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (mobile_attachKeyToEmailSelection == "false")
+                                    {
+                                        mobile_attachKeyToEmailDefined = true;
+                                        mobile_attachKeyToEmail = false;
+                                    }
+                                    else
+                                    {
+                                        if (mobile_attachKeyToEmailSelection == "true")
+                                            mobile_attachKeyToEmailDefined = true;
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "pc_deletekeyaftersending":
+                                    pc_deleteKeyAfterSendingSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (pc_deleteKeyAfterSendingSelection == "true")
+                                    {
+                                        pc_deleteKeyAfterSending = true;
+                                        pc_deleteKeyAfterSendingGLOBAL = true;
+                                    }
+                                    else
+                                    {
+                                        if (pc_deleteKeyAfterSendingSelection != "false")
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "legal_deletekeyaftersending":
+                                    legal_deleteKeyAfterSendingSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (legal_deleteKeyAfterSendingSelection == "true")
+                                        legal_deleteKeyAfterSending = true;
+                                    else
+                                    {
+                                        if (legal_deleteKeyAfterSendingSelection != "false")
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "mobile_deletekeyaftersending":
+                                    mobile_deleteKeyAfterSendingSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (mobile_deleteKeyAfterSendingSelection == "true")
+                                    {
+                                        mobile_deleteKeyAfterSendingDefined = true;
+                                        mobile_deleteKeyAfterSending = true;
+                                        mobile_deleteKeyAfterSendingGLOBAL = true;
+                                    }
+                                    else
+                                    {
+                                        if (mobile_deleteKeyAfterSendingSelection == "false")
+                                            mobile_deleteKeyAfterSendingDefined = true;
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "pc_usestrongpasswords":
+                                    pc_useStrongPasswordsSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (pc_useStrongPasswordsSelection == "false")
+                                        pc_strongPasswords = false;
+                                    else
+                                    {
+                                        if (pc_useStrongPasswordsSelection != "true")
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "legal_usestrongpasswords":
+                                    legal_useStrongPasswordsSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (legal_useStrongPasswordsSelection == "false")
+                                        legal_strongPasswords = false;
+                                    else
+                                    {
+                                        if (legal_useStrongPasswordsSelection != "true")
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "mobile_usestrongpasswords":
+                                    mobile_useStrongPasswordsSelection = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    if (mobile_useStrongPasswordsSelection == "false")
+                                    {
+                                        mobile_strongPasswordsDefined = true;
+                                        mobile_strongPasswords = false;
+                                    }
+                                    else
+                                    {
+                                        if (mobile_useStrongPasswordsSelection == "true")
+                                            mobile_strongPasswordsDefined = true;
+                                        else
+                                        {
+                                            artifactsFound = true;
+                                            confFileArtifacts.Add(new Artifact(index, record));
+                                        }
+                                    }
+                                    break;
+
+                                case "pc_keyretrievallocation":
+                                    pc_keyRetrievalLocation = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    break;
+
+                                case "mobile_keyretrievallocation":
+                                    mobile_keyRetrievalLocation = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    break;
+
+                                case "legal_keyretrievallocation":
+                                    legal_keyRetrievalLocation = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    break;
+
+                                case "mobile_template":
+                                    mobileTemplate = record.Substring(record.IndexOf(' ') + 1).Trim().ToLower();
+                                    mobileTemplateDefined = true;
+                                    break;
+
+                                case "mobile_message":
+                                   mobile_messageFile = record.Substring(record.IndexOf(' ') + 1).Trim();
+                                   mobile_messageDefined = true;
+                                   /*tr = new StreamReader(record.Substring(record.IndexOf(' ') + 1).Trim().ToLower());
+                                   mobileMessage = tr.ReadToEnd();
+                                   tr.Close(); */
+                                   break;
+
+                                default:
+                                    artifactsFound = true;
+                                    confFileArtifacts.Add(new Artifact(index, record));
+                                    break;
+                            }
+                        }
+                    }
+                    catch (Exception) 
+                    {
+                        artifactsFound = true;
+                        artifact = new Artifact(index, record);
+                        confFileArtifacts.Add(artifact);
+                    }
+                }
+
+                #endregion
+            }
+
+            workingDirectory = stdlib.AppendDate((Directory.GetCurrentDirectory() + "\\" + Environment.UserName)) + "\\";
+
+            log = new Log(logFile, logLevel);
+            log.writeSeparator("KRTool" + Environment.NewLine + "Version " + ver + Environment.NewLine + "Copyright 2010-2013 by Mike Bruno");
+
+            /*****Validate Configuration*****/
+
+            #region Validate_CA
+            if (CA == "")
+            {
+                log.write(Log._ERROR, "Certification Authority (CA) not defined in configuration file", false);
+                conf_valid = false;
+            }
+            else
+                log.write(Log._INFO, "CA: " + CA, false);
+            #endregion
+
+            #region Validate_Templates
+            if (templates.Count == 0)
+            {
+                log.write(Log._ERROR, "No certificate templates defined in configuration file", false);
+                conf_valid = false;
+            }
+            else
+            {
+                log.write(Log._INFO, "Certificate Templates:", false);
+                foreach (string template in templates)
+                {
+                    tmp = template.Split(',');
+                    log.echo("Template Name: " + tmp[0], true);
+                    log.echo("    Object ID: " + tmp[1], true);
+                    log.echo("");
+
+                }
+            }
+            #endregion
+
+            #region Validate_Domain
+            if (String.Equals(ADdomain, ""))
+            {
+                log.write(Log._ERROR, "Active Directory Domain (Domain): not defined in configuration file", false);
+                conf_valid = false;
+            }
+            else
+                log.write(Log._INFO, "Active Directory Domain: " + ADdomain, false);
+            #endregion
+
+            #region Validate_ScopeDN
+            if (String.Equals(ADscopeDN, ""))
+            {
+                log.write(Log._ERROR, "DN of AD user container (ADContainerDN): not defined in configuration file", false);
+                conf_valid = false;
+            }
+            else
+                log.write(Log._INFO, "DN of AD user container: " + ADscopeDN, false);
+            #endregion
+
+            #region Validate_mailHost
+            if (String.Equals(mailHost, ""))
+            {
+                log.write(Log._ERROR, "SMTP Relay host (mailhost): not defined in configuration file", false);
+                mail_valid = false;
+            }
+            else
+                log.write(Log._INFO, "SMTP Relay host: " + mailHost, false);
+            #endregion
+
+            #region Validate_FromAddress
+            if (String.Equals(fromAddress, ""))
+            {
+                log.write(Log._ERROR, "Email sending address (MailSender): not defined in configuration file", false);
+                mail_valid = false;
+            }
+            else
+            {
+                if (!stdlib.isValidEmailAddress(fromAddress))
+                {
+                    log.write(Log._ERROR, "Email \"From\" address (MailSender): " + "\"" + fromAddress + "\" this is not a properly formatted RFC822 Email address", false);
+                    mail_valid = false;
+                }
+                else
+                {
+                    log.write(Log._INFO, "Email \"From\" address (MailSender): " + fromAddress, false);
+                }
+            }
+            #endregion
+
+            #region Validate PC Password Distribution Method
+
+            log.write(Log._DEBUG, "PC Password Distribution Method (PC_PasswordDistributionMethod):" + pc_passwordDistributionMethod, false);
+
+            #endregion
+
+            #region Validate PC Strong Passwords
+
+            if (pc_strongPasswords)
+                log.write(Log._DEBUG, "Use strong passwords for PC recovery (PC_UseStrongPasswords): TRUE", false);
+            else
+                log.write(Log._DEBUG, "Use strong passwords for PC recovery (PC_UseStrongPasswords): FALSE", false);
+
+            #endregion
+
+            #region Validate PC KeyRetrievalLocation
+
+            if (pc_keyRetrievalLocation != "")
+            {
+                if (stdlib.lastChar(pc_keyRetrievalLocation) != '\\')
+                    pc_keyRetrievalLocation = pc_keyRetrievalLocation + "\\";
+
+                if (Directory.Exists(pc_keyRetrievalLocation))
+                {
+                    pc_keyRetrievalLocationDefined = true;
+                    log.write(Log._INFO, "Key Retrieval Location (PC_KeyRetrievalLocation): \"" + pc_keyRetrievalLocation + "\"", false);
+                }
+                else
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(pc_keyRetrievalLocation);
+                        pc_keyRetrievalLocationDefined = true;
+                        log.write(Log._INFO, "Key Retrieval Location (PC_KeyRetrievalLocation): \"" + pc_keyRetrievalLocation + "\"", false);
+                    }
+
+                    catch (Exception e)
+                    {
+                        log.exception(Log._WARNING, "The path specified for \"KeyRetrievalLocation\" (\"" + pc_keyRetrievalLocation + "\") does not exist and could not be created.", e, false);
+                        pc_keyRetrievalLocationDefined = false;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Validate PC Attach Key To Email
+
+            log.write(Log._DEBUG, "PC Recovery - Attach Key to Email (PC_AttachKeyToEmail): " + pc_attachKeyToEmailSelection, false);
+
+            #endregion
+
+            #region Validate PC Delete After Sending
+
+            log.write(Log._DEBUG, "PC Recovery - Delete Key After Sending (PC_DeleteKeyAfterSending): " + pc_deleteKeyAfterSendingSelection, false);
+
+            #endregion
+
+            #region Validate_MobileTemplate
+
+            if (mobileTemplateDefined)
+                log.write(Log._DEBUG, "Mobile Certificate Template OID (MobileTemplate): " + mobileTemplate, false);
+            else
+            {
+                log.write(Log._WARNING, "No Mobile Certificate Template OID (Mobile_Template) was defined.  Mobile Recovery will be disabled.", false);
+                mobile_valid = false;
+            }
+
+            #endregion
+
+            #region Validate Mobile Password Distribution Method
+
+            log.write(Log._DEBUG, "Password Distribution Method for Mobile Devices (Mobile_PasswordDistributionMethod):" + mobile_passwordDistributionMethod, false);
+            #endregion
+
+            #region Validate Mobile_KeyRetrievalLocation
+
+            if (mobile_keyRetrievalLocation != "")
+            {
+                if (stdlib.lastChar(mobile_keyRetrievalLocation) != '\\')
+                    mobile_keyRetrievalLocation = mobile_keyRetrievalLocation + "\\";
+
+                if (Directory.Exists(mobile_keyRetrievalLocation))
+                {
+                    mobile_keyRetrievalLocationDefined = true;
+                    log.write(Log._INFO, "Mobile Key Retrieval Location: \"" + mobile_keyRetrievalLocation + "\"", false);
+                }
+                else
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(mobile_keyRetrievalLocation);
+                        mobile_keyRetrievalLocationDefined = true;
+                        log.write(Log._INFO, "Mobile Key Retrieval Location: \"" + mobile_keyRetrievalLocation + "\"", false);
+                    }
+
+                    catch (Exception e)
+                    {
+                        log.exception(Log._WARNING, "The path specified for \"Mobile_KeyRetrievalLocation\" (\"" + mobile_keyRetrievalLocation + "\") does not exist and could not be created.", e, false);
+                        mobile_keyRetrievalLocationDefined = false;
+                    }
+                }
+            }
+
+            else
+            {
+                if (pc_keyRetrievalLocationDefined)
+                {
+                    mobile_keyRetrievalLocation = pc_keyRetrievalLocation;
+                    mobile_keyRetrievalLocationDefined = true;
+                }
+            }
+
+            #endregion
+
+            #region Validate Mobile Password Strength
+
+            if (mobile_strongPasswords)
+                log.write(Log._DEBUG, "Use strong passwords for mobile recoveries (Mobile_UseStrongPasswords): TRUE", false);
+            else
+                log.write(Log._DEBUG, "Use strong passwords for mobile recoveries (Mobile_UseStrongPasswords): FALSE", false);
+
+            #endregion
+
+            #region Validate Mobile Attach Key to Email
+
+            log.write(Log._DEBUG, "Mobile Recovery - Attach Key to Email (Mobile_AttachKeyToEmail): " + mobile_attachKeyToEmailSelection, false);
+
+            #endregion
+
+            #region Validate Mobile Delete Key After Sending
+
+            log.write(Log._DEBUG, "Mobile Recovery - Delete Key After Sending (Mobile_DeleteKeyAfterSending): " + mobile_deleteKeyAfterSendingSelection, false);
+
+            #endregion
+
+            #region Validate Legal Password Distribution Method
+
+            log.write(Log._DEBUG, "Password Distribution Method for Legal Discovery (Legal_PasswordDistributionMethod): " + legal_passwordDistributionMethod, false);
+
+            #endregion
+
+            #region Validate Legal Strong Passwords
+
+            if (legal_strongPasswords)
+                log.write(Log._DEBUG, "Use strong passwords for Legal Discovery recoveries (Legal_UseStrongPasswords): TRUE", false);
+            else
+                log.write(Log._DEBUG, "Use strong passwords for Legal Discovery recoveries (Legal_UseStrongPasswords): FALSE", false);
+
+            #endregion
+
+            #region Validate Legal KeyRetrievalLocation
+
+            if (legal_keyRetrievalLocation != "")
+            {
+                if (stdlib.lastChar(legal_keyRetrievalLocation) != '\\')
+                    legal_keyRetrievalLocation = legal_keyRetrievalLocation + "\\";
+
+                if (Directory.Exists(legal_keyRetrievalLocation))
+                {
+                    legal_keyRetrievalLocationDefined = true;
+                    log.write(Log._INFO, "Legal Discovery Key Retrieval Location (Legal_KeyRetrievalLocation): \"" + legal_keyRetrievalLocation + "\"", true);
+                }
+                else
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(legal_keyRetrievalLocation);
+                        legal_keyRetrievalLocationDefined = true;
+                        log.write(Log._INFO, "Legal Discovery Key Retrieval Location (Legal_KeyRetrievalLocation): \"" + legal_keyRetrievalLocation + "\"", true);
+                    }
+
+                    catch (Exception e)
+                    {
+                        log.exception(Log._WARNING, "The path specified for \"Legal_KeyRetrievalLocation\" (\"" + legal_keyRetrievalLocation + "\") does not exist and could not be created.", e, true);
+                        pc_keyRetrievalLocationDefined = false;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Validate Legal Delete Key After Sending
+
+            log.write(Log._DEBUG, "Legal Recovery - Delete Key After Sending (Legal_DeleteKeyAfterSending): " + legal_deleteKeyAfterSendingSelection, false);
+
+            #endregion
+
+            #region Validate Legal EmailAddress
+            if (String.Equals(legal_email, ""))
+            {
+                log.write(Log._ERROR, "Legal Recovery - From Address (Legal_Email): not defined in configuration file", false);
+                legal_emailSettingsValid = false;
+            }
+            else
+            {
+                if (!stdlib.isValidEmailAddress(legal_email))
+                {
+                    log.write(Log._ERROR, "Legal Recovery - From Address (Legal_Email) " + "\"" + legal_email + "\": this is not a properly formatted RFC822 Email address", false);
+                    legal_emailSettingsValid = false;
+                }
+                else
+                {
+                    log.write(Log._INFO, "Legal Discovery Email Address (LegalDiscovery): " + fromAddress, true);
+                }
+            }
+            #endregion
+
+            #region Validate PC Display Password On Screen
+
+            if (pc_passwordDistributionMethod == "onscreen")
+            {
+                pc_displayPasswordOnScreen = true;
+                log.write(Log._WARNING, "You have chosen to have the password for recovered keys displayed on-screen (\"PasswordDistributionMethod: OnScreen\").  This introduces a security risk.  Consider using Email instead.", true);
+            }
+            else
+            {
+                if (pc_passwordDistributionMethod.ToLower() == "byemail")
+                    pc_displayPasswordOnScreen = false;
+                else
+                {
+                    log.write(Log._ERROR, "Value specified for \"PasswordDistributionMethod\" not recognized.  Acceptable values for this property are \"ByEmail\" and \"OnScreen\"", false);
+                    conf_valid = false;
+                }
+            }
+
+            #endregion
+
+            #region Validate PC Attach Key To Email
+
+            if (pc_displayPasswordOnScreen)
+                log.write(Log._DEBUG, "PC Recovery - Attach Key File to Email: TRUE", false);
+            else
+                log.write(Log._DEBUG, "PC Recovery - Attach Key File to Email: FALSE", false);
+
+            #endregion
+
+            #region validate Mobile_DeleteKeyAfterSending
+
+            if (mobile_deleteKeyAfterSending)
+                log.write(Log._DEBUG, "Mobile Recovery - Delete Key after sending (Mobile_DeleteKeyAfterSending): TRUE", false);
+            else
+                log.write(Log._DEBUG, "Mobile Recovery - Delete Key after sending (Mobile_DeleteKeyAfterSending): FALSE", false);
+
+            #endregion
+
+            /* #region Validate_MobileMessage
+
+            if (mobileTemplateDefined)
+            {
+                log.write(Log._DEBUG, "Mobile Recovery - Certificate Template (Mobile_Template): " + mobileTemplate, false);
+                if (mobile_MessageBody == "")
+                {
+                    log.write(Log._ERROR, "A certificate template for mobile devices was defined, but not a message body for mobile recoveries (\"MobileMessage\").  The default message body (\"UserMessage\") will be used instead.", false);
+                    mobile_valid = false;
+                }
+                else
+                {
+                    if (!stdlib.InString(mobile_MessageBody, "[PASSWORD]") & !mobile_displayPasswordOnScreen)
+                    {
+                        log.write(Log._ERROR, "The password placeholder string (\"[PASSWORD\") does not exist in the mobile message, and the tool is not configured to display the password on-screen.  Mobile Recovery will be disabled", false);
+                        mobile_valid = false;
+                    }
+                    else
+                    {
+                        if (stdlib.InString(mobile_MessageBody, "[PATH]") & !mobile_keyRetrievalLocationDefined)
+                        {
+                            log.write(Log._ERROR, "Mobile message body contains \"[PATH]\" placeholder, but Mobile Key Retrieval Location (Mobile_KeyRetrievalLocation) was not properly defined.  Mobile Recovery will be disabled.", false);
+                            mobile_valid = false;
+                        }
+                        else
+                            log.write(Log._INFO, "Mobile message body defined.", false);
+                    }
+                }
+            }
+
+            else
+            {
+                log.write(Log._WARNING, "Mobile Recovery - No certificate template was specified (Mobile_Template).  Mobile Recovery will be disabled.", false);
+                mobile_valid = false;
+            }
+
+            #endregion */
+
+            #region validate Mobile_StrongPasswords
+
+            if (mobile_strongPasswords)
+                log.write(Log._DEBUG, "Mobile Recovery - Use Strong Passwords: TRUE", false);
+            else
+                log.write(Log._DEBUG, "Mobile Recovery - Use Strong Passwords: FALSE", false);
+
+            #endregion
+
+            #region Validate PC Message Body
+
+            if (pc_messageDefined)
+            {
+                try
+                {
+                    tr = new StreamReader(pc_messageFile);
+                    pc_MessageBody = tr.ReadToEnd();
+                    tr.Close();
+                    log.write(Log._DEBUG, "PC Recovery - Message Body file (PC_Message): \"" + pc_messageFile + "\"", false);
+
+                    if (!pc_displayPasswordOnScreen)
+                    {
+                        if (!stdlib.InString(pc_MessageBody, "[PASSWORD]"))
+                        {
+                            log.write(Log._WARNING, "PC Recovery - Password Distribution Method (PC_PasswordDistributionMethod) is set to \"ByEmail\" but message file (PC_Message) does not contain the password placeholder text (\"[PASSWORD\").  PC Recovery will be disabled.", false);
+                            pc_valid = false;
+                        }
+                    }
+
+                    if (pc_keyRetrievalLocationDefined & !pc_attachKeyToEmail & pc_deleteKeyAfterSending)
+                    {
+                        if (!stdlib.InString(pc_MessageBody, "[PATH]"))
+                        {
+                            log.write(Log._WARNING, "PC Recovery - Key Retrieval Location is defined, but the message file (PC_Message) does not contain the key retrieval location placeholder text (\"[PATH]\").  PC Recovery will be disabled.", false);
+                            pc_valid = false;
+                        }
+                    }
+
+                    if (!stdlib.InString(pc_MessageBody, "[NAME]"))
+                        log.write(Log._WARNING, "PC Recovery - The message file (PC_Message) does not contain the placeholder text for the key owner's name (\"[NAME]\").", false);
+                }
+
+                catch (Exception e)
+                {
+                    log.exception(Log._ERROR, "PC Recovery - Message Body file (PC_Message): \"" + pc_messageFile + "\" - unable to read file.", e, false);
+                    pc_messageDefined = false;
+                    if (!pc_displayPasswordOnScreen || pc_attachKeyToEmail || pc_deleteKeyAfterSending)
+                    {
+                        log.write(Log._INFO, "PC Recovery will be disabled.", false);
+                        mobile_valid = false;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Validate Legal Message Body
+
+            if (legal_messageDefined)
+            {
+                try
+                {
+                    tr = new StreamReader(legal_messageFile);
+                    legal_MessageBody = tr.ReadToEnd();
+                    tr.Close();
+                    log.write(Log._DEBUG, "Legal Recovery - Message Body file (Legal_Message): \"" + legal_messageFile + "\"", false);
+
+                    if (!legal_displayPasswordOnScreen)
+                    {
+                        if (!stdlib.InString(legal_MessageBody, "[PASSWORD]"))
+                        {
+                            log.write(Log._WARNING, "Legal Recovery - Password Distribution Method (Legal_PasswordDistributionMethod) is set to \"ByEmail\" but message file (Legal_Message) does not contain the password placeholder text (\"[PASSWORD\").  Legal Recovery will be disabled.", false);
+                            legal_valid = false;
+                        }
+                    }
+
+                    if (legal_keyRetrievalLocationDefined & !legal_attachKeyToEmail & legal_deleteKeyAfterSending)
+                    {
+                        if (!stdlib.InString(legal_MessageBody, "[PATH]"))
+                        {
+                            log.write(Log._WARNING, "Legal Recovery - Key Retrieval Location is defined, but the message file (Legal_Message) does not contain the key retrieval location placeholder text (\"[PATH]\").  Legal Recovery will be disabled.", false);
+                            legal_valid = false;
+                        }
+                    }
+
+                }
+
+                catch (Exception e)
+                {
+                    log.exception(Log._ERROR, "Legal Recovery - Message Body file (Legal_Message): \"" + legal_messageFile + "\" - unable to read file.", e, false);
+                    legal_messageDefined = false;
+                    if (!legal_displayPasswordOnScreen || legal_attachKeyToEmail || legal_deleteKeyAfterSending)
+                    {
+                        log.write(Log._INFO, "Legal Recovery will be disabled.", false);
+                        legal_valid = false;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Validate Mobile Message Body
+
+            if (mobile_messageDefined)
+            {
+                try
+                {
+                    tr = new StreamReader(mobile_messageFile);
+                    mobile_MessageBody = tr.ReadToEnd();
+                    tr.Close();
+                    log.write(Log._DEBUG, "Mobile Recovery - Message Body file (Mobile_Message): \"" + mobile_messageFile + "\"", false);
+
+                    if (!mobile_displayPasswordOnScreen)
+                    {
+                        if (!stdlib.InString(mobile_MessageBody, "[PASSWORD]"))
+                        {
+                            log.write(Log._ERROR, "Mobile Recovery - Password Distribution Method (Mobile_PasswordDistributionMethod) is set to \"ByEmail\" but message file (Mobile_Message) does not contain the password placeholder text (\"[PASSWORD\").  Mobile Recovery will be disabled.", false);
+                            mobile_valid = false;
+                        }
+                    }
+
+                    if (mobile_keyRetrievalLocationDefined & !mobile_attachKeyToEmail & mobile_deleteKeyAfterSending)
+                    {
+                        if (!stdlib.InString(mobile_MessageBody, "[PATH]"))
+                        {
+                            log.write(Log._ERROR, "Mobile Recovery - Key Retrieval Location is defined, but the message file (Mobile_Message) does not contain the key retrieval location placeholder text (\"[PATH]\").  Mobile Recovery will be disabled.", false);
+                            mobile_valid = false;
+                        }
+                    }
+
+                    if (!stdlib.InString(mobile_MessageBody, "[NAME]"))
+                        log.write(Log._WARNING, "Mobile Recovery - The message file (Mobile_Message) does not contain the placeholder text for the key owner's name (\"[NAME]\").", false);
+                }
+
+                catch (Exception e)
+                {
+                    log.exception(Log._ERROR, "Mobile Recovery - Message Body file (Mobile_Message): \"" + mobile_messageFile + "\" - unable to read file.", e, false);
+                    mobile_messageDefined = false;
+                    if (!mobile_displayPasswordOnScreen || mobile_attachKeyToEmail || mobile_deleteKeyAfterSending)
+                    {
+                        log.write(Log._INFO, "Mobile Recovery will be disabled.", false);
+                        mobile_valid = false;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Validate PC Recovery Email Settings
+
+            if (!pc_displayPasswordOnScreen || pc_deleteKeyAfterSending || pc_attachKeyToEmail)
+            {
+                if (!(mail_valid & pc_emailSettingsValid))
+                {
+                    log.write(Log._WARNING, "Problems with the Email configuration prevent PC Recovery from being enabled.", false);
+                    pc_valid = false;
+                }
+            }
+
+            #endregion
+
+            #region Validate Legal Recovery Email Settings
+
+            if (!legal_displayPasswordOnScreen || legal_deleteKeyAfterSending || legal_attachKeyToEmail)
+            {
+                if (!(mail_valid & legal_emailSettingsValid))
+                {
+                    log.write(Log._WARNING, "Problems with the Email configuration prevent Legal Recovery from being enabled.", false);
+                    legal_valid = false;
+                }
+            }
+
+            #endregion
+
+            #region Validate Mobile Recovery Email Settings
+
+            if (!mobile_displayPasswordOnScreen || mobile_deleteKeyAfterSending || mobile_attachKeyToEmail)
+            {
+                if (!(mail_valid & mobile_emailSettingsValid))
+                {
+                    log.write(Log._WARNING, "Problems with the Email configuration prevent Mobile Recovery from being enabled.", false);
+                    mobile_valid = false;
+                }
+            }
+
+            #endregion
+
+            #region Report Conf File Artifiacts
+            if (artifactsFound)
+            {
+                log.write(Log._WARNING, "Errors were encountered while reading the configuration file:", false);
+                foreach (Artifact a in confFileArtifacts)
+                    log.echo(a.print(), true);
+            }
+
+            #endregion
+
+            if (!conf_valid)
+                log.write(Log._CRITICAL, "KRTool cannot continue due to incorrect or missing configuration parameters.", false);
+            else
+                Shell.exec("regsvr32.exe /s certadm.dll");
+        }
+
+        #endregion
+    }
+
+    class Artifact
+    {
+        int lineNumber;
+        string text;
+
+        public Artifact(int index, string line)
+        {
+            lineNumber = index;
+            text = line;
+        }
+
+        public string print()
+        {
+            return "Line " + lineNumber.ToString() + ": \"" + text + "\"";
+        }
+    }
+}
