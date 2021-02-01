@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using MJBLogger;
 
 namespace PKIKeyRecovery
 {
@@ -24,7 +25,7 @@ namespace PKIKeyRecovery
             InitializeComponent();
             System.Drawing.Icon icon = PKIKeyRecovery.Properties.Resources.pki;
             this.Icon = icon;
-            conf = new Configuration();
+            conf = new PKIKeyRecovery.Configuration();
             if (!conf.conf_valid)
             {
                 MessageBox.Show("Error reading configuration file.  Check log for details.", "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -112,7 +113,7 @@ namespace PKIKeyRecovery
                 {
                     if (!user.recoverKeysFromCA(password, false, rbtnEDiscovery.Checked))
                     {
-                        conf.log.write(Log._ERROR, "Problems were encountered when attempting recovery keys for user \"" + username + "\"", false);
+                        conf.Log.Error("Problems were encountered when attempting recovery keys for user \"" + username + "\"");
                         return false;
                     }
                     return deliverKeys(user, password, rbtnEDiscovery.Checked);
@@ -140,34 +141,34 @@ namespace PKIKeyRecovery
 
             foreach (string username in usernames)
             {
-                conf.log.write(Log._INFO, "Processing user \"" + username + "\"", false);
+                conf.Log.Info("Processing user \"" + username + "\"");
                 currentUser = new User(username, conf);
                 if (!currentUser.exists())
-                    conf.log.write(Log._WARNING, "User \"" + username + "\" was not found in the specified Active Directory container (" + conf.ADscopeDN + ")", false);
+                    conf.Log.Warning("User \"" + username + "\" was not found in the specified Active Directory container (" + conf.ADscopeDN + ")");
                 else
-                    conf.log.write(Log._DEBUG, "User \"" + username + "\" found in the specified Active Directory container.", false);
+                    conf.Log.Verbose("User \"" + username + "\" found in the specified Active Directory container.");
 
                 if (currentUser.valid)
                 {
                     if (currentUser.recoverKeysFromCA(password, true, false))
                     {
-                        conf.log.write(Log._DEBUG, "Key recovery for user " + username + " succeeded.", false);
+                        conf.Log.Verbose("Key recovery for user " + username + " succeeded.");
                         if (currentUser.HasArchivedCerts())
                         {
-                            conf.log.write(Log._DEBUG, "User \"" + username + " had one or more archived keys.", false);
+                            conf.Log.Verbose("User \"" + username + " had one or more archived keys.");
                             anyKeysRecovered = 1;
                             if (currentUser.hasMergedPFX())
                             {
-                                conf.log.write(Log._DEBUG, "User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.", false);
+                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
                                 mergedKeys++;
                                 pfxFiles.Add(currentUser.mergedPFX);
                             }
                             else
                             {
-                                conf.log.write(Log._WARNING, "PFX files for user \"" + username + "\" could not be merged.  The individual PFX files for this user will be attempted to be merged into the combined PFX file for this recovery request.", false);
+                                conf.Log.Warning("PFX files for user \"" + username + "\" could not be merged.  The individual PFX files for this user will be attempted to be merged into the combined PFX file for this recovery request.");
                                 foreach (string pfxFile in currentUser.keyFiles)
                                 {
-                                    conf.log.echo(pfxFile);
+                                    conf.Log.Echo(pfxFile);
                                     pfxFiles.Add(pfxFile);
                                 }
                             }
@@ -176,23 +177,23 @@ namespace PKIKeyRecovery
                     else
                     {
                         fullSuccess = 0;
-                        conf.log.write(Log._WARNING, "Key recovery for user + \"" + username + "\" was not completely successful.", false);
+                        conf.Log.Warning("Key recovery for user + \"" + username + "\" was not completely successful.");
                         if (currentUser.AnyKeysRecovered())
                         {
-                            conf.log.write(Log._WARNING, "Some keys were able to be recovered for user \"" + username + "\"", false);
+                            conf.Log.Warning("Some keys were able to be recovered for user \"" + username + "\"");
                             anyKeysRecovered = 1;
                             if (currentUser.hasMergedPFX())
                             {
-                                conf.log.write(Log._DEBUG, "User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.", false);
+                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
                                 mergedKeys++;
                                 pfxFiles.Add(currentUser.mergedPFX);
                             }
                             else
                             {
-                                conf.log.write(Log._WARNING, "PFX files for user \"" + username + "\" could not be merged.  The individual PFX files for this user will be attempted to be merged into the combined PFX file for this recovery request.", false);
+                                conf.Log.Warning("PFX files for user \"" + username + "\" could not be merged.  The individual PFX files for this user will be attempted to be merged into the combined PFX file for this recovery request.");
                                 foreach (string pfxFile in currentUser.keyFiles)
                                 {
-                                    conf.log.echo(pfxFile);
+                                    conf.Log.Echo(pfxFile);
                                     pfxFiles.Add(pfxFile);
                                 }
                             }
@@ -200,53 +201,53 @@ namespace PKIKeyRecovery
                     }
                 }
                 else
-                    conf.log.write(Log._ERROR, "Certificates for user \"" + username + "\" could not be enumerated.  Skipping.", false);
+                    conf.Log.Error("Certificates for user \"" + username + "\" could not be enumerated.  Skipping.");
             }
 
             if (mergedKeys >= 1)
             {
-                conf.log.write(Log._DEBUG, "Attempting to combine all PFX files for the recovery into a single merged PFX file.", false);
+                conf.Log.Verbose("Attempting to combine all PFX files for the recovery into a single merged PFX file.");
                 if (mergePFX(password, pfxFiles, conf, bulkRecoveryMergedPFX))
                 {
-                    conf.log.write(Log._INFO, "Merged PFX file \"" + bulkRecoveryMergedPFX + "\" created for this recovery.", false);
+                    conf.Log.Info("Merged PFX file \"" + bulkRecoveryMergedPFX + "\" created for this recovery.");
                     if (conf.legal_keyRetrievalLocationDefined)
                     {
-                        conf.log.write(Log._INFO, "Attempting to copy merged PFX file to Legal Discovery Key Retrieval Location\"" + bulkRecoveryRetrievalLocation + "\"", false);
+                        conf.Log.Info("Attempting to copy merged PFX file to Legal Discovery Key Retrieval Location\"" + bulkRecoveryRetrievalLocation + "\"");
                         try
                         {
                             File.Copy(bulkRecoveryMergedPFX, bulkRecoveryRetrievalLocation);
                             if (!File.Exists(bulkRecoveryRetrievalLocation))
-                                conf.log.write(Log._ERROR, "A problem was encountered when copying the merged PFX file to the Legal Discovery Key Retreival Location: \"" + bulkRecoveryRetrievalLocation + "\"", false);
+                                conf.Log.Error("A problem was encountered when copying the merged PFX file to the Legal Discovery Key Retreival Location: \"" + bulkRecoveryRetrievalLocation + "\"");
                             else
                             {
-                                conf.log.write(Log._DEBUG, "Merged PFX file was copied to the Legal Discovery Retrieval Location: \"" + bulkRecoveryRetrievalLocation + "\"", false);
-                                conf.log.write(Log._DEBUG, "Attempting to delete local Merged PFX file \"" + bulkRecoveryMergedPFX + "\"", false);
-                                if (stdlib.DeleteFile(bulkRecoveryMergedPFX, conf.log))
+                                conf.Log.Verbose("Merged PFX file was copied to the Legal Discovery Retrieval Location: \"" + bulkRecoveryRetrievalLocation + "\"");
+                                conf.Log.Verbose("Attempting to delete local Merged PFX file \"" + bulkRecoveryMergedPFX + "\"");
+                                if (stdlib.DeleteFile(bulkRecoveryMergedPFX, conf.Log))
                                 {
-                                    conf.log.write(Log._DEBUG, "Attempting to delete working directory \"" + conf.workingDirectory + "\"");
+                                    conf.Log.Verbose("Attempting to delete working directory \"" + conf.workingDirectory + "\"");
                                     if (Folder.Delete(conf.workingDirectory))
-                                        conf.log.write(Log._DEBUG, "Successfully deleted working directory.", false);
+                                        conf.Log.Verbose("Successfully deleted working directory.");
                                     else
-                                        conf.log.write(Log._WARNING, "Unable to delete working directory \"" + conf.workingDirectory + "\"", false);
+                                        conf.Log.Warning("Unable to delete working directory \"" + conf.workingDirectory + "\"");
                                 }
                                 else
-                                    conf.log.write(Log._WARNING, "Unable to delete local Merged PFX file \"" + bulkRecoveryMergedPFX + "\"", false);
+                                    conf.Log.Warning("Unable to delete local Merged PFX file \"" + bulkRecoveryMergedPFX + "\"");
                             }
                         }
 
                         catch (Exception e)
                         {
-                            conf.log.exception(Log._ERROR, "A problem was encountered when copying the merged PFX file to the Legal Discovery Key Retreival Location: \"" + bulkRecoveryRetrievalLocation + "\"", e, false);
+                            conf.Log.Exception(e, "A problem was encountered when copying the merged PFX file to the Legal Discovery Key Retreival Location: \"" + bulkRecoveryRetrievalLocation + "\"");
                         }
                     }
 
-                    conf.log.write(Log._INFO, "Merged PFX file \"" + bulkRecoveryMergedPFX + "\" created for this recovery.  Attempting to delete individual PFX files.", false);
+                    conf.Log.Info("Merged PFX file \"" + bulkRecoveryMergedPFX + "\" created for this recovery.  Attempting to delete individual PFX files.");
                     foreach (string pfxFile in pfxFiles)
                     {
-                        if (stdlib.DeleteFile(pfxFile, conf.log))
-                            conf.log.write(Log._DEBUG, "Successfully deleted \"" + pfxFile + "\"", false);
+                        if (stdlib.DeleteFile(pfxFile, conf.Log))
+                            conf.Log.Verbose("Successfully deleted \"" + pfxFile + "\"");
                         else
-                            conf.log.write(Log._WARNING, "Could not delete \"" + pfxFile + "\"", false);
+                            conf.Log.Warning("Could not delete \"" + pfxFile + "\"");
                     }
                 }
             }
@@ -269,26 +270,26 @@ namespace PKIKeyRecovery
             keyList += "\"";
             #endregion
 
-            conf.log.write(Log._INFO, "Attempting to merge all PFX files in the working directory", false);
+            conf.Log.Info("Attempting to merge all PFX files in the working directory");
             command = "certutil -p \"" + password + "," + password + "\" -mergepfx -user " + keyList + " \"" + mergedPFX + "\"";
             sanitizedCommand = command.Replace(password, "[password]");
-            Shell.executeAndLog(command, sanitizedCommand, conf.log);
+            Shell.executeAndLog(command, sanitizedCommand, conf.Log);
 
             if (File.Exists(mergedPFX))
             {
-                conf.log.write(Log._INFO, "Successfully created merged PFX file \"" + mergedPFX + "\"", false);
+                conf.Log.Info("Successfully created merged PFX file \"" + mergedPFX + "\"");
                 return true;
             }
             else
             {
-                conf.log.write(Log._ERROR, "Could not merge PFX files", false);
+                conf.Log.Error("Could not merge PFX files");
                 return false;
             }
         }
 
         private static void deleteUsersMergedPFXFiles(string mergedPFX, Configuration conf)
         {
-            conf.log.write(Log._INFO, "Deleting individual users' merged PFX files", false);
+            conf.Log.Info("Deleting individual users' merged PFX files");
             bool allDeleted = true;
             string[] files = Directory.GetFiles(conf.workingDirectory, "*.pfx");
 
@@ -296,21 +297,21 @@ namespace PKIKeyRecovery
             {
                 if (!stdlib.InString(file, mergedPFX))
                 {
-                    conf.log.write(Log._DEBUG, "Attempting to delete \"" + file + "\"", false);
-                    if (stdlib.DeleteFile(file, conf.log))
-                        conf.log.write(Log._DEBUG, "File \"" + file + "\" successfully deleted.", false);
+                    conf.Log.Verbose("Attempting to delete \"" + file + "\"");
+                    if (stdlib.DeleteFile(file, conf.Log))
+                        conf.Log.Verbose("File \"" + file + "\" successfully deleted.");
                     else
                     {
-                        conf.log.write(Log._DEBUG, "File \"" + file + "\" could not be deleted.", false);
+                        conf.Log.Verbose("File \"" + file + "\" could not be deleted.");
                         allDeleted = false;
                     }
                 }
             }
 
             if (allDeleted)
-                conf.log.write(Log._INFO, "All individual users' merged PFX files deleted successfully.", false);
+                conf.Log.Info("All individual users' merged PFX files deleted successfully.");
             else
-                conf.log.write(Log._WARNING, "Not all individual users' merged PFX files could be deleted.", false);
+                conf.Log.Warning("Not all individual users' merged PFX files could be deleted.");
         }
 
         private bool SendEmail(User user, string password, bool eDiscovery)
@@ -330,13 +331,13 @@ namespace PKIKeyRecovery
                 if (conf.legal_attachKeyToEmail & user.keysMerged)
                 {
                     stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to \"" + email + "\".  Key file was attached.", false);
+                    conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
                 }
 
                 else
                 {
                     stdlib.SendMail(from, email, subject, message, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to " + email, false);
+                    conf.Log.Info("Email sent to " + email);
                 }
             }
             else
@@ -344,12 +345,12 @@ namespace PKIKeyRecovery
                 email = user.getEmail();
                 if (email == null)
                 {
-                    conf.log.write(Log._ERROR, "Email address for " + user.getSAM() + " not found in the Active Directory.", false);
+                    conf.Log.Error("Email address for " + user.getSAM() + " not found in the Active Directory.");
                     return false;
                 }
                 if (!stdlib.isValidEmailAddress(email))
                 {
-                    conf.log.write(Log._ERROR, "Email address for " + user.getSAM() + " was found in the Active Directory, but it is not in a RFC822-compliant format.", false);
+                    conf.Log.Error("Email address for " + user.getSAM() + " was found in the Active Directory, but it is not in a RFC822-compliant format.");
                     return false;
                 }
                 subject = "Your recovered encryption keys";
@@ -361,12 +362,12 @@ namespace PKIKeyRecovery
                 if (conf.pc_attachKeyToEmail & user.keysMerged)
                 {
                     stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to \"" + email + "\".  Key file was attached.", false);
+                    conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
                 }
                 else
                 {
                     stdlib.SendMail(from, email, subject, message, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to " + email, false);
+                    conf.Log.Info("Email sent to " + email);
                 }
             }
 
@@ -392,12 +393,12 @@ namespace PKIKeyRecovery
                 if (conf.legal_attachKeyToEmail & user.keysMerged)
                 {
                     stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to \"" + email + "\".  Key file was attached.", false);
+                    conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
                 }
                 else
                 {
                     stdlib.SendMail(from, email, subject, message, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to " + email, false);
+                    conf.Log.Info("Email sent to " + email);
                 }
             }
             else
@@ -405,12 +406,12 @@ namespace PKIKeyRecovery
                 email = user.getEmail();
                 if (email == null)
                 {
-                    conf.log.write(Log._ERROR, "Email address for " + user.getSAM() + " not found in the Active Directory.", false);
+                    conf.Log.Error("Email address for " + user.getSAM() + " not found in the Active Directory.");
                     return false;
                 }
                 if (!stdlib.isValidEmailAddress(email))
                 {
-                    conf.log.write(Log._ERROR, "Email address for " + user.getSAM() + " was found in the Active Directory, but it is not in a RFC822-compliant format.", false);
+                    conf.Log.Error("Email address for " + user.getSAM() + " was found in the Active Directory, but it is not in a RFC822-compliant format.");
                     return false;
                 }
                 subject = "Your recovered encryption keys";
@@ -419,13 +420,13 @@ namespace PKIKeyRecovery
                 if (conf.pc_attachKeyToEmail & user.keysMerged)
                 {
                     stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to \"" + email + "\".  Key file was attached.", false);
+                    conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
 
                 }
                 else
                 {
                     stdlib.SendMail(from, email, subject, message, conf.mailHost);
-                    conf.log.write(Log._INFO, "Email sent to " + email, false);
+                    conf.Log.Info("Email sent to " + email);
                 }
             }
             return true;
@@ -443,7 +444,7 @@ namespace PKIKeyRecovery
             subject = "Recovered Encryption Keys";
             message = conf.legal_MessageBody.Replace("[PASSWORD]",password);
             stdlib.SendMail(from, email, subject, message, conf.mailHost);
-            conf.log.write(Log._INFO, "Email sent to " + email, false);
+            conf.Log.Info("Email sent to " + email);
         }
 
         private bool SendEmailMobile(string email, string SAM, string password, string keyFile)
@@ -469,12 +470,12 @@ namespace PKIKeyRecovery
                     stdlib.SendMail(from, email, subject, message, keyFile, conf.mailHost);
                 else
                     stdlib.SendMail(from, email, subject, message, conf.mailHost);
-                conf.log.write(Log._INFO, "Email sent to " + email, false);
+                conf.Log.Info("Email sent to " + email);
                 return true;
             }
             catch (Exception e)
             {
-                conf.log.exception(Log._ERROR, "A problem was encountered when attempting to send the Email:", e, false);
+                conf.Log.Exception(e, "A problem was encountered when attempting to send the Email");
                 return false;
             }
         }
@@ -492,7 +493,7 @@ namespace PKIKeyRecovery
             subject = "Recovered Encryption Keys";
             message = conf.legal_MessageBody.Replace("[PASSWORD]", password).Replace("[PATH]", bulkRecoveryRetrievalLocation);
             stdlib.SendMail(from, email, subject, message, conf.mailHost);
-            conf.log.write(Log._INFO, "Email sent to " + email, false);
+            conf.Log.Info("Email sent to " + email);
         }
 
         private bool deliverKeys(User user, string password, bool eDiscovery)
@@ -576,7 +577,7 @@ namespace PKIKeyRecovery
 
         private bool mobileRecovery(string SAM)
         {
-            conf.log.write(Log._DEBUG, "Entering method: mobileRecovery(string)", false);
+            conf.Log.Verbose("Entering method: mobileRecovery(string)");
             string outfile = conf.workingDirectory + "mobileRecovery.out";
             string command = "certutil -config " + conf.CA + " -view -restrict \"upn=" + SAM + "@" + conf.ADdomain + "\" -out serialnumber,notbefore > " + outfile;
             string keyFile = conf.workingDirectory + SAM + "_mobile.pfx";
@@ -628,52 +629,52 @@ namespace PKIKeyRecovery
                     return false;
             }
 
-            Shell.executeAndLog(command, command, conf.log);
+            Shell.executeAndLog(command, command, conf.Log);
             if (!File.Exists(outfile))
             {
-                conf.log.write(Log._ERROR, "File not found: \"" + outfile + "\"", false);
+                conf.Log.Error("File not found: \"" + outfile + "\"");
                 return false;
             }
             TextReader tr = new StreamReader(outfile);
 
             while (tr.Peek() != -1)
             {
-                if (conf.log.get_level() == Log._DEBUG)
-                    conf.log.echo("");
+                if (conf.Log.Level.GE(LogLevel.Verbose))
+                    conf.Log.LineFeed();
                 currentRecord = tr.ReadLine();
-                conf.log.write(Log._DEBUG, "Current line: \"" + currentRecord + "\"", false);
+                conf.Log.Verbose("Current line: \"" + currentRecord + "\"");
                 if (!stdlib.InString(currentRecord, "EMPTY"))
                 {
                     if (stdlib.InString(currentRecord, "Serial Number:"))
                     {
-                        conf.log.write(Log._DEBUG, "Serial number found...", false);
+                        conf.Log.Verbose("Serial number found...");
                         if (!anyCertsAnalyzedYet)
                         {
-                            conf.log.write(Log._DEBUG, "This is the first serial number encountered and will be considered the most recently-issued by default.", false);
+                            conf.Log.Verbose("This is the first serial number encountered and will be considered the most recently-issued by default.");
                             anyCertsAnalyzedYet = true;
                             mostRecentSN = currentRecord.Split(':')[1].Trim();
-                            conf.log.write(Log._DEBUG, "Most recent serial number: \"" + mostRecentSN + "\"", false);
+                            conf.Log.Verbose("Most recent serial number: \"" + mostRecentSN + "\"");
                             currentRecord = tr.ReadLine();
                             mostCurrentlyIssued = Convert.ToDateTime(currentRecord.Split(':')[1].Split(' ')[1]);
-                            conf.log.write(Log._DEBUG, "Issuance date:             \"" + mostCurrentlyIssued.ToString() + "\"", false);
+                            conf.Log.Verbose("Issuance date:             \"" + mostCurrentlyIssued.ToString() + "\"");
                             certFound = true;
 
                         }
                         else
                         {
                             certFound = true;
-                            conf.log.write(Log._DEBUG, "New serial number encountered...", false);
+                            conf.Log.Verbose("New serial number encountered...");
                             currentSN = currentRecord.Split(':')[1].Trim();
-                            if (conf.log.get_level() == Log._DEBUG)
-                                conf.log.echo("Serial Number: \"" + currentSN + "\"", true);
+                            if (conf.Log.Level.GE(LogLevel.Verbose))
+                                conf.Log.Echo("Serial Number: \"" + currentSN + "\"");
                             currentRecord = tr.ReadLine();
                             issuanceDate = Convert.ToDateTime(currentRecord.Split(':')[1].Split(' ')[1]);
-                            if (conf.log.get_level() == Log._DEBUG)
-                                conf.log.echo("Issuance Date:  \"" + issuanceDate.ToString() + "\"", true);
+                            if (conf.Log.Level.GE(LogLevel.Verbose))
+                                conf.Log.Echo("Issuance Date:  \"" + issuanceDate.ToString() + "\"");
 
                             if (issuanceDate > mostCurrentlyIssued)
                             {
-                                conf.log.write(Log._DEBUG, "This certificate's issuance date is the most recent encountered so far.", false);
+                                conf.Log.Verbose("This certificate's issuance date is the most recent encountered so far.");
                                 mostRecentSN = currentSN;
                                 mostCurrentlyIssued = issuanceDate;
                             }
@@ -681,40 +682,38 @@ namespace PKIKeyRecovery
                     }
                 }
                 else
-                    conf.log.write(Log._DEBUG, "EMPTY serial number.  Skipping...", false);
+                    conf.Log.Verbose("EMPTY serial number.  Skipping...");
             }
 
             tr.Close();
 
             if (!certFound)
             {
-                conf.log.write(Log._WARNING, "No certificates were found for \"" + SAM + "\"", false);
-                conf.log.write(Log._DEBUG, "Attempting to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                conf.Log.Warning("No certificates were found for \"" + SAM + "\"");
+                conf.Log.Verbose("Attempting to delete the working directory \"" + conf.workingDirectory + "\"");
                 if (!Folder.Delete(conf.workingDirectory))
-                    conf.log.write(Log._WARNING, "Unable to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                    conf.Log.Warning("Unable to delete the working directory \"" + conf.workingDirectory + "\"");
                 return false;
             }
             else
             {
-                conf.log.write(Log._INFO, "Most recently-issued certificate for \"" + SAM + "\":", false);
-                if (conf.log.get_level() >= Log._INFO)
-                    conf.log.echo("Serial Number: \"" + mostRecentSN + "\"", true);
-                if (conf.log.get_level() >= Log._INFO)
-                    conf.log.echo("Issuance Date:  \"" + mostCurrentlyIssued.ToString() + "\"", true);
-                conf.log.write(Log._INFO, "Recovering certificate...");
-                password = crypto.GeneratePassword(8, 12, conf.mobile_strongPasswords);
+                conf.Log.Info("Most recently-issued certificate for \"" + SAM + "\":");
+                conf.Log.Echo("Serial Number: \"" + mostRecentSN + "\"", level: LogLevel.Info);
+                conf.Log.Echo("Issuance Date:  \"" + mostCurrentlyIssued.ToString() + "\"", level: LogLevel.Info);
+                conf.Log.Info("Recovering certificate...");
+                password = CryptoClass.GeneratePassword(conf.MinPasswordLength, conf.MaxPasswordLength, conf.mobile_strongPasswords);
                 if (recoverKeyMobile(mostRecentSN, BLOBFile, keyFile, password))
                 {
-                    conf.log.write(Log._INFO, "Key successfully recovered as \"" + keyFile + "\".", false);
+                    conf.Log.Info("Key successfully recovered as \"" + keyFile + "\".");
 
                     if (conf.mail_valid & (conf.mobile_displayPasswordOnScreen || conf.mobile_attachKeyToEmail))
                     {
-                        conf.log.write(Log._INFO, "Sending Email to \"" + email + "\"", false);
+                        conf.Log.Info("Sending Email to \"" + email + "\"");
                         if (SendEmailMobile(email, SAM, password, keyFile))
-                            conf.log.write(Log._INFO, "Email successfully sent.", false);
+                            conf.Log.Info("Email successfully sent.");
                         else
                         {
-                            conf.log.write(Log._ERROR, "Email was unable to be sent.", false);
+                            conf.Log.Error("Email was unable to be sent.");
                             success = false;
                         }
                     }
@@ -725,23 +724,23 @@ namespace PKIKeyRecovery
                                         MessageBoxButtons.OK, 
                                         MessageBoxIcon.Information);
 
-                    conf.log.write(Log._DEBUG, "Cleaning up...", false);
-                    conf.log.write(Log._DEBUG, "Attempting to delete the certutil output file \"" + outfile + "\"", false);
-                    if (!stdlib.DeleteFile(outfile, conf.log))
-                        conf.log.write(Log._WARNING, "Unable to delete the certutil output file \"" + outfile + "\"", false);
+                    conf.Log.Verbose("Cleaning up...");
+                    conf.Log.Verbose("Attempting to delete the certutil output file \"" + outfile + "\"");
+                    if (!stdlib.DeleteFile(outfile, conf.Log))
+                        conf.Log.Warning("Unable to delete the certutil output file \"" + outfile + "\"");
 
-                    conf.log.write(Log._DEBUG, "Attempting to delete the BLOB file \"" + BLOBFile + "\"", false);
-                    if (!stdlib.DeleteFile(BLOBFile, conf.log))
-                        conf.log.write(Log._WARNING, "Unable to delete the BLOB file \"" + BLOBFile + "\"", false);
+                    conf.Log.Verbose("Attempting to delete the BLOB file \"" + BLOBFile + "\"");
+                    if (!stdlib.DeleteFile(BLOBFile, conf.Log))
+                        conf.Log.Warning("Unable to delete the BLOB file \"" + BLOBFile + "\"");
 
                     if (conf.mobile_deleteKeyAfterSending & (conf.mobile_attachKeyToEmail || (conf.mobile_keyRetrievalLocationDefined & stdlib.InString(conf.mobile_MessageBody, "[PATH]"))))
                     {
-                        conf.log.write(Log._DEBUG, "Attempting to delete the key file \"" + keyFile + "\"", false);
-                        if (!stdlib.DeleteFile(keyFile, conf.log))
-                            conf.log.write(Log._WARNING, "Unable to delete the key file \"" + keyFile + "\"", false);
-                        conf.log.write(Log._DEBUG, "Attempting to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                        conf.Log.Verbose("Attempting to delete the key file \"" + keyFile + "\"");
+                        if (!stdlib.DeleteFile(keyFile, conf.Log))
+                            conf.Log.Warning("Unable to delete the key file \"" + keyFile + "\"");
+                        conf.Log.Verbose("Attempting to delete the working directory \"" + conf.workingDirectory + "\"");
                         if (!Folder.Delete(conf.workingDirectory))
-                            conf.log.write(Log._WARNING, "Unable to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                            conf.Log.Warning("Unable to delete the working directory \"" + conf.workingDirectory + "\"");
                     }
 
                     conf.mobile_displayPasswordOnScreen = conf.mobile_displayPasswordOnScreenGLOBAL;
@@ -750,24 +749,24 @@ namespace PKIKeyRecovery
                 }
                 else
                 {
-                    conf.log.write(Log._ERROR, "A problem was encountered when attempting to recover they key", false);
-                    conf.log.write(Log._DEBUG, "Cleaning up...", false);
-                    conf.log.write(Log._DEBUG, "Attempting to delete the certutil output file \"" + outfile + "\"", false);
-                    if (!stdlib.DeleteFile(outfile, conf.log))
-                        conf.log.write(Log._WARNING, "Unable to delete the certutil output file \"" + outfile + "\"", false);
+                    conf.Log.Error("A problem was encountered when attempting to recover they key");
+                    conf.Log.Verbose("Cleaning up...");
+                    conf.Log.Verbose("Attempting to delete the certutil output file \"" + outfile + "\"");
+                    if (!stdlib.DeleteFile(outfile, conf.Log))
+                        conf.Log.Warning("Unable to delete the certutil output file \"" + outfile + "\"");
 
-                    conf.log.write(Log._DEBUG, "Attempting to delete the BLOB file \"" + BLOBFile + "\"", false);
-                    if (!stdlib.DeleteFile(BLOBFile, conf.log))
-                        conf.log.write(Log._WARNING, "Unable to delete the BLOB file \"" + BLOBFile + "\"", false);
+                    conf.Log.Verbose("Attempting to delete the BLOB file \"" + BLOBFile + "\"");
+                    if (!stdlib.DeleteFile(BLOBFile, conf.Log))
+                        conf.Log.Warning("Unable to delete the BLOB file \"" + BLOBFile + "\"");
 
                     if (conf.mobile_deleteKeyAfterSending)
                     {
-                        conf.log.write(Log._DEBUG, "Attempting to delete the key file \"" + keyFile + "\"", false);
-                        if (!stdlib.DeleteFile(keyFile, conf.log))
-                            conf.log.write(Log._WARNING, "Unable to delete the key file \"" + keyFile + "\"", false);
-                        conf.log.write(Log._DEBUG, "Attempting to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                        conf.Log.Verbose("Attempting to delete the key file \"" + keyFile + "\"");
+                        if (!stdlib.DeleteFile(keyFile, conf.Log))
+                            conf.Log.Warning("Unable to delete the key file \"" + keyFile + "\"");
+                        conf.Log.Verbose("Attempting to delete the working directory \"" + conf.workingDirectory + "\"");
                         if (!Folder.Delete(conf.workingDirectory))
-                            conf.log.write(Log._WARNING, "Unable to delete the working directory \"" + conf.workingDirectory + "\"", false);
+                            conf.Log.Warning("Unable to delete the working directory \"" + conf.workingDirectory + "\"");
                     }
                     conf.mobile_displayPasswordOnScreen = conf.mobile_displayPasswordOnScreenGLOBAL;
                     conf.mobile_deleteKeyAfterSending = conf.mobile_deleteKeyAfterSendingGLOBAL;
@@ -779,27 +778,27 @@ namespace PKIKeyRecovery
         private bool recoverKeyMobile(string serialNumber, string BLOBFile, string keyFile, string password)
         {
             bool recovered = false;
-            conf.log.write(Log._DEBUG, "Entering method \"recoverKeyMobile(string)\"", false);
+            conf.Log.Verbose("Entering method \"recoverKeyMobile(string)\"");
             if (makeBLOB(serialNumber, BLOBFile))
             {
                 string[] output;
                 string command = "certutil -recoverkey -p " + password + " \"" + BLOBFile + "\" \"" + keyFile + "\"";
-                output = Shell.exec(command, command.Replace(password, "[password]"), conf.log);
+                output = Shell.exec(command, command.Replace(password, "[password]"), conf.Log);
                 if (File.Exists(keyFile))
                 {
-                    conf.log.write(Log._INFO, "Key successfully recovered for certificate with serial number \"" + serialNumber + "\" as " + keyFile, false);
+                    conf.Log.Info("Key successfully recovered for certificate with serial number \"" + serialNumber + "\" as " + keyFile);
                     recovered = true;
                 }
                 else
                 {
-                    conf.log.write(Log._ERROR, "Key could not be recovered for certificate with serial number \"" + serialNumber + "\"", false);
-                    if (conf.log.get_level() >= Log._ERROR)
+                    conf.Log.Error("Key could not be recovered for certificate with serial number \"" + serialNumber + "\"");
+                    if (conf.Log.Level.GE(LogLevel.Error))
                     {
-                        conf.log.echo("Result of command:");
+                        conf.Log.Echo("Result of command:");
                         try
                         {
                             foreach (string line in output)
-                                conf.log.echo(line.Replace(password, "[password]"), true);
+                                conf.Log.Echo(line.Replace(password, "[password]"));
                         }
                         catch (Exception) { }
                     }
@@ -811,16 +810,16 @@ namespace PKIKeyRecovery
         private bool makeBLOB(string serialNumber, string BLOBFile)
         {
             string command = "certutil -config " + conf.CA + " -getkey " + serialNumber + " " + "\"" + BLOBFile + "\"";
-            Shell.exec(command, command, conf.log);
+            Shell.exec(command, command, conf.Log);
 
             if (File.Exists(BLOBFile))
             {
-                conf.log.write(Log._INFO, "BLOB for certificate with serial number \"" + serialNumber + "\" saved as \"" + BLOBFile + "\"", false);
+                conf.Log.Info("BLOB for certificate with serial number \"" + serialNumber + "\" saved as \"" + BLOBFile + "\"");
                 return true;
             }
             else
             {
-                conf.log.write(Log._ERROR, "Unable to retreive BLOB for " + conf.mobileTemplate + " certificate " + serialNumber, false);
+                conf.Log.Error("Unable to retreive BLOB for " + conf.mobileTemplate + " certificate " + serialNumber);
                 return false;
             }
         }
@@ -905,7 +904,7 @@ namespace PKIKeyRecovery
             Folder.Create(conf.workingDirectory);
             if (!Directory.Exists(conf.workingDirectory))
             {
-                conf.log.write(Log._ERROR, "Unable to create working directory \"" + conf.workingDirectory + "\"", false);
+                conf.Log.Error("Unable to create working directory \"" + conf.workingDirectory + "\"");
                 return;
             }
 
@@ -919,7 +918,7 @@ namespace PKIKeyRecovery
             else
             {
 
-                if (RecoverKeysForUser(txtUserName.Text, crypto.GenerateRandomPassword(conf.pc_strongPasswords)))
+                if (RecoverKeysForUser(txtUserName.Text, CryptoClass.GenerateRandomPassword(conf.pc_strongPasswords)))
                     MessageBox.Show("Key recovery succeeded for " + txtUserName.Text + ".\nCheck log for details.", "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
                     MessageBox.Show("Key recovery for " + txtUserName.Text + " was not completely successfully.\nCheck log for details", "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -942,9 +941,9 @@ namespace PKIKeyRecovery
                 if (sourceFile == "")
                     return;
 
-                conf.log.write(Log._DEBUG, "source file name: " + sourceFile, false);
+                conf.Log.Verbose("source file name: " + sourceFile);
                 List<string> usernames = stdlib.ReadFile(sourceFile);
-                password = crypto.GenerateRandomPassword(conf.legal_strongPasswords);
+                password = CryptoClass.GenerateRandomPassword(conf.legal_strongPasswords);
 
                 switch (RecoverKeysFromList(usernames, password))
                 {
@@ -963,7 +962,7 @@ namespace PKIKeyRecovery
             }
             catch (Exception ex)
             {
-                conf.log.exception(Log._CRITICAL, "An exception occurred when attempting to recover keys for a list of users:", ex, false);
+                conf.Log.Exception(ex, "An exception occurred when attempting to recover keys for a list of users");
                 MessageBox.Show("Error opening file", "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -987,15 +986,15 @@ namespace PKIKeyRecovery
                 {
                     File.Delete(fileName);
                 }
-                catch (System.IO.IOException e)
+                catch (IOException e)
                 {
-                    conf.log.exception(Log._ERROR, e, false);
+                    conf.Log.Exception(e);
                     return false;
                 }
 
                 if (File.Exists(fileName))
                 {
-                    conf.log.write(Log._WARNING, "The file could not be deleted: \"" + fileName + "\"", false);
+                    conf.Log.Warning("The file could not be deleted: \"" + fileName + "\"");
                     return false;
                 }
                 else

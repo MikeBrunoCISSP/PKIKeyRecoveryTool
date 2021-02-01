@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using MJBLogger;
 
 namespace PKIKeyRecovery
 {
@@ -54,7 +55,7 @@ namespace PKIKeyRecovery
             fullSuccess = true;
             recoveredKeys = 0;
             int count;
-            conf.log.write(Log._INFO, "Current User: " + username, false);
+            conf.Log.Info("Current User: " + username);
 
             SAM = username;
             UPN = SAM + "@" + conf.ADdomain;
@@ -66,30 +67,30 @@ namespace PKIKeyRecovery
             keyRetrievalLocation = conf.pc_keyRetrievalLocation + SAM + ".pfx";
             legalDiscoveryKeyRetrievalLocation = conf.legal_keyRetrievalLocation + SAM + ".pfx";
 
-            if (conf.log.get_level() >= Log._DEBUG)
+            if (conf.Log.Level.GE(LogLevel.Verbose))
             {
-                conf.log.write(Log._DEBUG, "SAMAccountName: " + SAM, false);
-                conf.log.write(Log._DEBUG, "User Principal Name: " + UPN, false);
-                conf.log.write(Log._DEBUG, "Common Name: " + CN, false);
-                conf.log.write(Log._DEBUG, "Email Address: " + Email, false);
-                conf.log.write(Log._DEBUG, "BLOB Directory: " + BLOBDirectory, false);
-                conf.log.write(Log._DEBUG, "Key Directory: " + keyDirectory, false);
+                conf.Log.Verbose("SAMAccountName: " + SAM);
+                conf.Log.Verbose("User Principal Name: " + UPN);
+                conf.Log.Verbose("Common Name: " + CN);
+                conf.Log.Verbose("Email Address: " + Email);
+                conf.Log.Verbose("BLOB Directory: " + BLOBDirectory);
+                conf.Log.Verbose("Key Directory: " + keyDirectory);
             }
             count = getCertificates();
             switch (count)
             {
                 case -1:
-                    conf.log.write(Log._ERROR, "Problem encountered enumerating certificates for user " + SAM, false);
+                    conf.Log.Error("Problem encountered enumerating certificates for user " + SAM);
                     valid = false;
                     return;
 
                 case 0:
-                    conf.log.write(Log._INFO, "No certificates with archived keys found for user " + SAM, false);
+                    conf.Log.Info("No certificates with archived keys found for user " + SAM);
                     valid = true;
                     return;
 
                 default:
-                    conf.log.write(Log._INFO, count.ToString() + " certificates found with archived keys for user " + SAM, false);
+                    conf.Log.Info(count.ToString() + " certificates found with archived keys for user " + SAM);
                     hasArchivedCerts = true;
                     valid = true;
                     return;
@@ -110,16 +111,15 @@ namespace PKIKeyRecovery
 
             string[] tmp;
 
-            conf.log.write(Log._INFO, "Serial Numbers of Certificates for which to recover keys:", false);
-            foreach (string template in conf.templates)
+            conf.Log.Info("Serial Numbers of Certificates for which to recover keys:");
+            foreach (KeyValuePair<string,string> template in conf.templates)
             {
                 index = 1;
-                tmp = template.Split(',');
-                templateName = tmp[0];
-                templateOID = tmp[1];
+                templateName = template.Key;
+                templateOID = template.Value;
 
                 command = "certutil -config " + conf.CA + " -view -restrict " + "\"UPN=" + UPN + ",CertificateTemplate=" + templateOID + "\" -out SerialNumber";
-                Array SNs = Shell.exec(command, command, conf.log);
+                Array SNs = Shell.exec(command, command, conf.Log);
                 foreach (string record in SNs)
                 {
                     try
@@ -130,7 +130,7 @@ namespace PKIKeyRecovery
                             currentSN = stdlib.clean(stdlib.Split(record, ':', 1));
                             if (!(String.Equals(currentSN, "EMPTY")))
                             {
-                                conf.log.write(Log._INFO, "     " + currentSN, false);
+                                conf.Log.Info("     " + currentSN);
                                 crt = new Certificate(currentSN,
                                                       templateName,
                                                       conf.CA,
@@ -138,19 +138,19 @@ namespace PKIKeyRecovery
                                                       BLOBDirectory,
                                                       keyDirectory,
                                                       index,
-                                                      conf.log);
+                                                      conf.Log);
 
                                 certs.Add(crt);
                                 index++;
                             }
 
                             else
-                                conf.log.write(Log._ERROR, "This entry in the certificate database for user \"" + SAM + "\" has \"EMPTY\" listed as the serial number.  Ignoring.", false);
+                                conf.Log.Error("This entry in the certificate database for user \"" + SAM + "\" has \"EMPTY\" listed as the serial number.  Ignoring.");
                         }
                     }
                     catch (Exception e)
                     {
-                        conf.log.exception(Log._CRITICAL, "An exception was encountered while enumerating certificates for user \"" + SAM + "\"", e, false);
+                        conf.Log.Exception(e, "An exception was encountered while enumerating certificates for user \"" + SAM + "\"");
                         fullSuccess = false;
                         return -1;
                     }
@@ -183,7 +183,7 @@ namespace PKIKeyRecovery
                 {
                     if (!conf.pc_attachKeyToEmail & conf.pc_keyRetrievalLocationDefined)
                     {
-                        conf.log.write(Log._DEBUG, "Copying merged PFX file \"" + mergedPFX + "\" to Key Retreival location: \"" + keyRetrievalLocation + "\"", false);
+                        conf.Log.Verbose("Copying merged PFX file \"" + mergedPFX + "\" to Key Retreival location: \"" + keyRetrievalLocation + "\"");
                         try
                         {
                             if (eDiscovery)
@@ -194,24 +194,24 @@ namespace PKIKeyRecovery
                             File.Copy(mergedPFX, copyLocation, true);
                             if (!File.Exists(keyRetrievalLocation))
                             {
-                                conf.log.write(Log._ERROR, "A problem was encountered when copying the merged PFX file to the Key Retreival Location", false);
+                                conf.Log.Error("A problem was encountered when copying the merged PFX file to the Key Retreival Location");
                                 return false;
                             }
                         }
 
                         catch (Exception e)
                         {
-                            conf.log.exception(Log._ERROR, "A problem was encountered when copying the merged PFX file to the Key Retreival Location", e, false);
+                            conf.Log.Exception(e, "A problem was encountered when copying the merged PFX file to the Key Retreival Location");
                             return false;
                         }
                     }
                 }
 
-                conf.log.write(Log._DEBUG, "Deleting key directory for user \"" + SAM + "\"", false);
+                conf.Log.Verbose("Deleting key directory for user \"" + SAM + "\"");
                 Folder.Delete(keyDirectory);
             }
 
-            conf.log.write(Log._DEBUG, "Deleting BLOB directory for user \"" + SAM + "\"", false);
+            conf.Log.Verbose("Deleting BLOB directory for user \"" + SAM + "\"");
             Folder.Delete(BLOBDirectory);
             if (hasUnrecoverableKeys)
                 reportUnrecoveredKeys();
@@ -239,10 +239,10 @@ namespace PKIKeyRecovery
                 keyList += "\"";
                 #endregion
 
-                conf.log.write(Log._INFO, "Attempting to merge PFX files for user \"" + SAM + "\"", false);
+                conf.Log.Info("Attempting to merge PFX files for user \"" + SAM + "\"");
                 command = "certutil -p \"" + password + "," + password + "\" -mergepfx -user " + keyList + " \"" + mergedPFX + "\"";
                 sanitizedCommand = command.Replace(password, "[password]");
-                Shell.executeAndLog(command, sanitizedCommand, conf.log);
+                Shell.executeAndLog(command, sanitizedCommand, conf.Log);
             }
 
             else
@@ -253,7 +253,7 @@ namespace PKIKeyRecovery
                     {
                         if (!File.Exists(d.getKeyFile()))
                         {
-                            conf.log.write(Log._ERROR, "File not found \"" + d.getKeyFile() + "\"", false);
+                            conf.Log.Error("File not found \"" + d.getKeyFile() + "\"");
                             return false;
                         }
                         File.Copy(d.getKeyFile(), mergedPFX);
@@ -262,30 +262,30 @@ namespace PKIKeyRecovery
 
                 else
                 {
-                    conf.log.write(Log._ERROR, "No keys could be recovered for user \"" + SAM + "\"", false);
+                    conf.Log.Error("No keys could be recovered for user \"" + SAM + "\"");
                     return false;
                 }
             }
 
             if (File.Exists(mergedPFX))
             {
-                conf.log.write(Log._INFO, "Successfully created merged PFX file \"" + mergedPFX + "\"", false);
+                conf.Log.Info("Successfully created merged PFX file \"" + mergedPFX + "\"");
                 return true;
             }
             else
             {
-                conf.log.write(Log._ERROR, "Could not merge PFX files", false);
+                conf.Log.Error("Could not merge PFX files");
                 return false;
             }
         }
 
         private void reportUnrecoveredKeys()
         {
-            conf.log.write(Log._ERROR, "There were unrecovered keys for " + SAM, true);
+            conf.Log.Error("There were unrecovered keys for " + SAM);
             foreach (Certificate crt in certs)
             {
                 if (!crt.recovered)
-                    conf.log.write(Log._INFO, "     Serial Number: " + crt.getSerialNumber() + "     Certificate Template: " + crt.getTemplate(), true);
+                    conf.Log.Info("     Serial Number: " + crt.getSerialNumber() + "     Certificate Template: " + crt.getTemplate());
             }
         }
 
@@ -334,26 +334,26 @@ namespace PKIKeyRecovery
 
         public void cleanUp(bool isBulkRecovery)
         {
-            conf.log.write(Log._INFO, "Removing temporary files and folders created during key recovery for \"" + SAM + "\"", false);
+            conf.Log.Info("Removing temporary files and folders created during key recovery for \"" + SAM + "\"");
 
-            conf.log.write(Log._DEBUG, "Attempting to delete folder \"" + BLOBDirectory + "\"", false);
+            conf.Log.Verbose("Attempting to delete folder \"" + BLOBDirectory + "\"");
             if (!Folder.Delete(BLOBDirectory))
-                conf.log.write(Log._WARNING, "Unabled to delete folder \"" + BLOBDirectory + "\"", false);
+                conf.Log.Warning("Unabled to delete folder \"" + BLOBDirectory + "\"");
 
-            conf.log.write(Log._DEBUG, "Attempting to delete folder \"" + keyDirectory + "\"", false);
+            conf.Log.Verbose("Attempting to delete folder \"" + keyDirectory + "\"");
             if (!Folder.Delete(BLOBDirectory))
-                conf.log.write(Log._WARNING, "Unabled to delete folder \"" + keyDirectory + "\"", false);
+                conf.Log.Warning("Unabled to delete folder \"" + keyDirectory + "\"");
 
             if (!isBulkRecovery & conf.pc_deleteKeyAfterSending)
             {
-                conf.log.write(Log._DEBUG, "Attempting to delete file \"" + mergedPFX + "\"", false);
-                if (!stdlib.DeleteFile(mergedPFX, conf.log))
-                    conf.log.write(Log._WARNING, "Unabled to delete file \"" + mergedPFX + "\"", false);
+                conf.Log.Verbose("Attempting to delete file \"" + mergedPFX + "\"");
+                if (!stdlib.DeleteFile(mergedPFX, conf.Log))
+                    conf.Log.Warning("Unabled to delete file \"" + mergedPFX + "\"");
                 else
                 {
-                    conf.log.write(Log._DEBUG, "Attempting to delete working directory \"" + conf.workingDirectory + "\"", false);
+                    conf.Log.Verbose("Attempting to delete working directory \"" + conf.workingDirectory + "\"");
                     if (!Folder.Delete(conf.workingDirectory))
-                        conf.log.write(Log._WARNING, "Unabled to delete working directory", false);
+                        conf.Log.Warning("Unabled to delete working directory");
                 }
             }
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using MJBLogger;
 
 
 class Shell
@@ -24,19 +25,21 @@ class Shell
             return null;
     }
     
-    public static string[] exec(string command, string sanitizedCommand, Log log)
+    public static string[] exec(string command, string sanitizedCommand, MJBLog Log)
     {
-        log.write(Log._DEBUG, "Command: \"" + sanitizedCommand + "\"", false);
+        Log.Verbose("Command: \"" + sanitizedCommand + "\"");
         string output = ExecuteCommand(command);
 
         if (output != null)
         {
             string[] lines = output.Split('\n');
-            if (log.get_level() == Log._DEBUG)
+            if (Log.Level.GE(LogLevel.Verbose))
             {
-                log.write(Log._DEBUG, "Command Result:", false);
+                Log.Verbose("Command Result:");
                 foreach (string line in lines)
-                    log.echo(line, true);
+                {
+                    Log.Echo(line);
+                }
             }
             return lines;
         }
@@ -56,46 +59,37 @@ class Shell
         return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
     }
 
-    /*public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator, Log log)
+    public static string executeAndLog(string command, string sanitizedCommand, MJBLog Log)
     {
-        log.write(4, "Command : " + sanitizedCommand, false);
+        Log.Verbose("Command : " + sanitizedCommand);
         string output = ExecuteCommand(command);
-        log.write(4, "Command Result:", false);
-        log.write(4, output, false);
-        return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
-    } */
 
-    public static string executeAndLog(string command, string sanitizedCommand, Log log)
-    {
-        int logLevel = log.get_level();
-        log.write(DEBUG, "Command : " + sanitizedCommand, false);
-        string output = ExecuteCommand(command);
-        log.write(DEBUG, "Command Result:", false);
-
-        if (log.get_level() == Log._DEBUG)
+        if (Log.Level.GE(LogLevel.Verbose))
         {
+            Log.Verbose("Command Result:");
+
             string[] lines = Regex.Split(output, "\r\n");
             foreach (string line in lines)
             {
-                log.echo(line, true);
+                Log.Echo(line);
             }
         }
 
         return output;
     }
 
-    public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator, Log log)
+    public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator, MJBLog Log)
     {
-        log.write(DEBUG, "Command : " + sanitizedCommand, false);
+        Log.Verbose("Command : " + sanitizedCommand);
         string output = ExecuteCommand(command);
-        log.write(DEBUG, "Command Result:", false);
+        Log.Verbose("Command Result:");
 
-        if (log.get_level() == Log._DEBUG)
+        if (Log.Level.GE(LogLevel.Verbose))
         {
             string[] lines = Regex.Split(output, "\r\n");
             foreach (string line in lines)
             {
-                log.echo(line, true);
+                Log.Echo(line);
             }
         }
 

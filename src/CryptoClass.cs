@@ -6,7 +6,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-public class crypto
+public class CryptoClass
 {
     // Define default min and max password lengths.
     private static int DEFAULT_MIN_PASSWORD_LENGTH = 8;
@@ -29,7 +29,7 @@ public class crypto
     const int keySize = 256;
 
     //Contructor for a new crypto object
-    public crypto(string pwd)
+    public CryptoClass(string pwd)
     {
         passPhrase = pwd;
         /*salt = GeneratePassword(8, 16);
@@ -37,7 +37,7 @@ public class crypto
     }
 
     //Constructor for a pre-defined crypto object
-    public crypto(string pwd, string randomSaltValue, string initVector16char)
+    public CryptoClass(string pwd, string randomSaltValue, string initVector16char)
     {
         passPhrase = pwd;
         salt = randomSaltValue;

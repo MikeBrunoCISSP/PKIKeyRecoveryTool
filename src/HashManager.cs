@@ -45,7 +45,7 @@ class HashManager
 
     public string compute(string plaintext)
     {
-        byte[] salt = getBytes(crypto.GeneratePassword(4, 8, true));
+        byte[] salt = getBytes(CryptoClass.GeneratePassword(4, 8, true));
         byte[] message = concatenate(getBytes(plaintext), salt);
         byte[] hashBytes = hash.ComputeHash(message);
         byte[] hashWithSaltBytes = concatenate(message, salt);

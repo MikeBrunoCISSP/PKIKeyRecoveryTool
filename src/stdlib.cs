@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Net.Mail;
 using Microsoft.Win32;
+using MJBLogger;
 
 public class stdlib
 {
@@ -31,7 +32,7 @@ public class stdlib
         }
     }
 
-    public static bool DeleteFile(string fileName, Log log)
+    public static bool DeleteFile(string fileName, MJBLog log)
     {
 
         if (!(File.Exists(fileName)))
@@ -47,13 +48,13 @@ public class stdlib
             }
             catch (System.IO.IOException e)
             {
-                log.exception(Log._ERROR, e, false);
+                log.Exception(e);
                 return false;
             }
 
             if (File.Exists(fileName))
             {
-                log.write(Log._WARNING, "The file could not be deleted: \"" + fileName + "\"", false);
+                log.Warning("The file could not be deleted: \"" + fileName + "\"");
                 return false;
             }
             else

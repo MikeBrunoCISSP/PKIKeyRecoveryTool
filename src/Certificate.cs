@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using MJBLogger;
 
 namespace PKIKeyRecovery
 {
@@ -17,7 +18,7 @@ namespace PKIKeyRecovery
 
         int index;
         public bool recovered;
-        Log log;
+        MJBLog log;
 
         public Certificate(string sn, 
                            string tmpl, 
@@ -26,7 +27,7 @@ namespace PKIKeyRecovery
                            string BLOBDirectory, 
                            string keyDirectory, 
                            int i, 
-                           Log l)
+                           MJBLog l)
         {
             template = tmpl;
             serialNumber = sn;
@@ -39,13 +40,13 @@ namespace PKIKeyRecovery
 
             recovered = false;
 
-            if (log.get_level() >= Log._DEBUG)
+            if (log.Level.GE(LogLevel.Verbose))
             {
-                log.write(Log._DEBUG, "Serial Number: " + serialNumber, false);
-                log.write(Log._DEBUG, "Certificate Template Name: " + template, false);
-                log.write(Log._DEBUG, "Index: " + index, false);
-                log.write(Log._DEBUG, "BLOB File Name: " + BLOBFile, false);
-                log.write(Log._DEBUG, "Key File Name: " + keyFile, false);
+                log.Verbose("Serial Number: " + serialNumber);
+                log.Verbose("Certificate Template Name: " + template);
+                log.Verbose("Index: " + index);
+                log.Verbose("BLOB File Name: " + BLOBFile);
+                log.Verbose("Key File Name: " + keyFile);
             }
         }
 
@@ -58,19 +59,19 @@ namespace PKIKeyRecovery
                 output = Shell.exec(command, command.Replace(password, "[password]"), log);
                 if (File.Exists(keyFile))
                 {
-                    log.write(Log._INFO, "Key successfully recovered for " + template + " certificate " + serialNumber + " as " + keyFile, false);
+                    log.Info("Key successfully recovered for " + template + " certificate " + serialNumber + " as " + keyFile);
                     recovered = true;
                 }
                 else
                 {
-                    log.write(Log._ERROR, "Key could not be recovered for " + template + " certificate " + serialNumber, false);
-                    if (log.get_level() >= Log._ERROR)
+                    log.Error("Key could not be recovered for " + template + " certificate " + serialNumber);
+                    if (log.Level.GE(LogLevel.Error))
                     {
-                        log.echo("Result of command:");
+                        log.Echo("Result of command:");
                         try
                         {
                             foreach (string line in output)
-                                log.echo(line.Replace(password, "[password]"), true);
+                                log.Echo(line.Replace(password, "[password]"));
                         }
                         catch (Exception) { }
                     }
@@ -86,12 +87,12 @@ namespace PKIKeyRecovery
 
             if (File.Exists(BLOBFile))
             {
-                log.write(Log._INFO, "BLOB for " + template + " certificate " + serialNumber + " saved as " + BLOBFile, false);
+                log.Info("BLOB for " + template + " certificate " + serialNumber + " saved as " + BLOBFile);
                 return true;
             }
             else
             {
-                log.write(Log._ERROR, "Unable to retreive BLOB for " + template + " certificate " + serialNumber, false);
+                log.Error("Unable to retreive BLOB for " + template + " certificate " + serialNumber);
                 return false;
             }
         }
