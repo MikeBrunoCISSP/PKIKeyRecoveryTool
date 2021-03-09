@@ -313,10 +313,32 @@ using System.Linq;
         public bool exists,
                     enabled;
 
+        public string sAMAccountName;
+        public string commonName;
+
         public UserStatus(bool doesExist, bool isEnabled)
         {
             exists = doesExist;
             enabled = isEnabled;
+        }
+
+        public UserStatus(string sAMAccountName, bool exists, bool enabled)
+        {
+            this.sAMAccountName = sAMAccountName;
+            this.exists = exists;
+            this.enabled = enabled;
+        }
+
+        public UserStatus(Principal principal)
+        {
+            sAMAccountName = principal.SamAccountName;
+            exists = true;
+
+            var de = (DirectoryEntry)principal.GetUnderlyingObject();
+            int flags = (int)de.Properties["userAccountControl"].Value;
+            enabled = Convert.ToBoolean(flags & 0x0002);
+
+            commonName = (string)de.Properties[@"cn"][0]; 
         }
     }
 

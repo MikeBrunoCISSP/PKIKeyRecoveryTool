@@ -43,4 +43,9 @@ namespace PKIKeyRecovery
         internal const int MinPasswordLength = 8;
         internal const int MaxPasswordLength = 20;
     }
+
+    internal static class Constants
+    {
+        internal const string InvalidEmail = @"Invalid Email";
+    }
 }
