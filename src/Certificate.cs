@@ -10,11 +10,11 @@ namespace PKIKeyRecovery
     public class Certificate
     {
         string BLOBFile,
-               template,
-               serialNumber,
                CA;
 
-        public string keyFile;
+        public string KeyFile { get; private set; }
+        public string SerialNumber { get; private set; }
+        public string Template { get; private set; }
 
         int index;
         public bool recovered;
@@ -29,24 +29,24 @@ namespace PKIKeyRecovery
                            int i, 
                            MJBLog l)
         {
-            template = tmpl;
-            serialNumber = sn;
+            Template = tmpl;
+            SerialNumber = sn;
             CA = certificateAuthority;
             index = i;
             log = l;
 
-            BLOBFile = BLOBDirectory + username + "_" + template + "(" + index + ").BLOB";
-            keyFile = keyDirectory + username + "_" + template + "(" + index + ").pfx";
+            BLOBFile = BLOBDirectory + username + "_" + Template + "(" + index + ").BLOB";
+            KeyFile = keyDirectory + username + "_" + Template + "(" + index + ").pfx";
 
             recovered = false;
 
             if (log.Level.GE(LogLevel.Verbose))
             {
-                log.Verbose("Serial Number: " + serialNumber);
-                log.Verbose("Certificate Template Name: " + template);
+                log.Verbose("Serial Number: " + SerialNumber);
+                log.Verbose("Certificate Template Name: " + Template);
                 log.Verbose("Index: " + index);
                 log.Verbose("BLOB File Name: " + BLOBFile);
-                log.Verbose("Key File Name: " + keyFile);
+                log.Verbose("Key File Name: " + KeyFile);
             }
         }
 
@@ -55,16 +55,16 @@ namespace PKIKeyRecovery
             if (makeBLOB())
             {
                 string[] output;
-                string command = "certutil -recoverkey -p " + password + " \"" + BLOBFile + "\" \"" + keyFile + "\"";
+                string command = "certutil -recoverkey -p " + password + " \"" + BLOBFile + "\" \"" + KeyFile + "\"";
                 output = Shell.exec(command, command.Replace(password, "[password]"), log);
-                if (File.Exists(keyFile))
+                if (File.Exists(KeyFile))
                 {
-                    log.Info("Key successfully recovered for " + template + " certificate " + serialNumber + " as " + keyFile);
+                    log.Info("Key successfully recovered for " + Template + " certificate " + SerialNumber + " as " + KeyFile);
                     recovered = true;
                 }
                 else
                 {
-                    log.Error("Key could not be recovered for " + template + " certificate " + serialNumber);
+                    log.Error("Key could not be recovered for " + Template + " certificate " + SerialNumber);
                     if (log.Level.GE(LogLevel.Error))
                     {
                         log.Echo("Result of command:");
@@ -80,36 +80,28 @@ namespace PKIKeyRecovery
             return recovered;
         } //recoverKey
 
+        internal void Report()
+        {
+            RuntimeContext.Log.Echo($"       Serial Number: {SerialNumber}");
+            RuntimeContext.Log.Echo($"Certificate Template: {Template}");
+        }
+
         private bool makeBLOB()
         {
-            string command = "certutil -config " + CA + " -getkey " + serialNumber + " " + "\"" + BLOBFile + "\"";
+            string command = "certutil -config " + CA + " -getkey " + SerialNumber + " " + "\"" + BLOBFile + "\"";
             Shell.exec(command, command, log);
 
             if (File.Exists(BLOBFile))
             {
-                log.Info("BLOB for " + template + " certificate " + serialNumber + " saved as " + BLOBFile);
+                log.Info("BLOB for " + Template + " certificate " + SerialNumber + " saved as " + BLOBFile);
                 return true;
             }
             else
             {
-                log.Error("Unable to retreive BLOB for " + template + " certificate " + serialNumber);
+                log.Error("Unable to retreive BLOB for " + Template + " certificate " + SerialNumber);
                 return false;
             }
         }
 
-        public string getTemplate()
-        {
-            return template;
-        }
-
-        public string getSerialNumber()
-        {
-            return serialNumber;
-        }
-
-        public string getKeyFile()
-        {
-            return keyFile;
-        }
     } //class Certificate
 }

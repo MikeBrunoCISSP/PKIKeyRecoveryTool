@@ -56,33 +56,28 @@
             // btnRecoverFromList
             // 
             this.btnRecoverFromList.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRecoverFromList.Location = new System.Drawing.Point(287, 247);
-            this.btnRecoverFromList.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnRecoverFromList.Location = new System.Drawing.Point(191, 161);
             this.btnRecoverFromList.Name = "btnRecoverFromList";
-            this.btnRecoverFromList.Size = new System.Drawing.Size(176, 40);
+            this.btnRecoverFromList.Size = new System.Drawing.Size(117, 26);
             this.btnRecoverFromList.TabIndex = 7;
             this.btnRecoverFromList.Text = "Bulk Recovery";
             this.toolTip1.SetToolTip(this.btnRecoverFromList, "Recover keys for a group of individuals for legal discovery purposes.  ");
             this.btnRecoverFromList.UseVisualStyleBackColor = true;
-            //this.btnRecoverFromList.Click += new System.EventHandler(this.btnRecoverFromList_Click);
             // 
             // btnAbout
             // 
-            this.btnAbout.Location = new System.Drawing.Point(892, 396);
-            this.btnAbout.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnAbout.Location = new System.Drawing.Point(595, 257);
             this.btnAbout.Name = "btnAbout";
-            this.btnAbout.Size = new System.Drawing.Size(112, 35);
+            this.btnAbout.Size = new System.Drawing.Size(75, 23);
             this.btnAbout.TabIndex = 9;
             this.btnAbout.Text = "About";
             this.btnAbout.UseVisualStyleBackColor = true;
-            //this.btnAbout.Click += new System.EventHandler(this.btnAbout_Click);
             // 
             // rbtnUser
             // 
             this.rbtnUser.AutoSize = true;
             this.rbtnUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnUser.Location = new System.Drawing.Point(11, 124);
-            this.rbtnUser.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.rbtnUser.Location = new System.Drawing.Point(7, 81);
             this.rbtnUser.Name = "rbtnUser";
             this.rbtnUser.Size = new System.Drawing.Size(152, 30);
             this.rbtnUser.TabIndex = 4;
@@ -91,14 +86,12 @@
             this.toolTip1.SetToolTip(this.rbtnUser, "Recover all archived certificates and keys on behalf of an individual for install" +
         "ation on their laptop or desktop");
             this.rbtnUser.UseVisualStyleBackColor = true;
-            //this.rbtnUser.CheckedChanged += new System.EventHandler(this.rbtnUser_CheckedChanged);
             // 
             // rbtnEDiscovery
             // 
             this.rbtnEDiscovery.AutoSize = true;
             this.rbtnEDiscovery.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnEDiscovery.Location = new System.Drawing.Point(11, 195);
-            this.rbtnEDiscovery.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.rbtnEDiscovery.Location = new System.Drawing.Point(7, 127);
             this.rbtnEDiscovery.Name = "rbtnEDiscovery";
             this.rbtnEDiscovery.Size = new System.Drawing.Size(192, 30);
             this.rbtnEDiscovery.TabIndex = 5;
@@ -107,14 +100,12 @@
             this.toolTip1.SetToolTip(this.rbtnEDiscovery, "Recover all archived certificates and keys for an individual on behalf of legal d" +
         "iscovery");
             this.rbtnEDiscovery.UseVisualStyleBackColor = true;
-            //this.rbtnEDiscovery.CheckedChanged += new System.EventHandler(this.rbtnEDiscovery_CheckedChanged);
             // 
             // rbtnMobile
             // 
             this.rbtnMobile.AutoSize = true;
             this.rbtnMobile.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnMobile.Location = new System.Drawing.Point(11, 160);
-            this.rbtnMobile.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.rbtnMobile.Location = new System.Drawing.Point(7, 104);
             this.rbtnMobile.Name = "rbtnMobile";
             this.rbtnMobile.Size = new System.Drawing.Size(101, 30);
             this.rbtnMobile.TabIndex = 7;
@@ -123,54 +114,46 @@
             this.toolTip1.SetToolTip(this.rbtnMobile, "Recover an individual\'s most recently-issued certificate and key for insatllation" +
         " on their mobile device(s)");
             this.rbtnMobile.UseVisualStyleBackColor = true;
-            //this.rbtnMobile.CheckedChanged += new System.EventHandler(this.rbtnMobile_CheckedChanged);
             // 
             // txtUserName
             // 
             this.txtUserName.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtUserName.Location = new System.Drawing.Point(128, 35);
-            this.txtUserName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtUserName.Location = new System.Drawing.Point(85, 23);
             this.txtUserName.Name = "txtUserName";
-            this.txtUserName.Size = new System.Drawing.Size(212, 32);
+            this.txtUserName.Size = new System.Drawing.Size(143, 32);
             this.txtUserName.TabIndex = 1;
             this.toolTip1.SetToolTip(this.txtUserName, "Enter the Active Directory SAMAccountName of the individual whose keys are to be " +
         "recovered");
-            //this.txtUserName.TextChanged += new System.EventHandler(this.txtUserName_TextChanged);
             // 
             // btnValidate
             // 
             this.btnValidate.Enabled = false;
             this.btnValidate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnValidate.Location = new System.Drawing.Point(362, 45);
-            this.btnValidate.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnValidate.Location = new System.Drawing.Point(241, 29);
             this.btnValidate.Name = "btnValidate";
-            this.btnValidate.Size = new System.Drawing.Size(333, 37);
+            this.btnValidate.Size = new System.Drawing.Size(222, 24);
             this.btnValidate.TabIndex = 2;
             this.btnValidate.Text = "Confirm Username";
             this.toolTip1.SetToolTip(this.btnValidate, "Check whether the entered username exists in the Active Directory");
             this.btnValidate.UseVisualStyleBackColor = true;
-            //this.btnValidate.Click += new System.EventHandler(this.btnValidate_Click);
             // 
             // btnRecoverKeys
             // 
             this.btnRecoverKeys.Enabled = false;
             this.btnRecoverKeys.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRecoverKeys.Location = new System.Drawing.Point(5, 247);
-            this.btnRecoverKeys.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnRecoverKeys.Location = new System.Drawing.Point(3, 161);
             this.btnRecoverKeys.Name = "btnRecoverKeys";
-            this.btnRecoverKeys.Size = new System.Drawing.Size(176, 40);
+            this.btnRecoverKeys.Size = new System.Drawing.Size(117, 26);
             this.btnRecoverKeys.TabIndex = 6;
             this.btnRecoverKeys.Text = "Individual Recovery";
             this.toolTip1.SetToolTip(this.btnRecoverKeys, "Recover keys for an individual");
             this.btnRecoverKeys.UseVisualStyleBackColor = true;
-            //this.btnRecoverKeys.Click += new System.EventHandler(this.btnRecoverKeys_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(8, 41);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(5, 27);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(119, 26);
             this.label1.TabIndex = 0;
@@ -180,17 +163,15 @@
             // 
             this.panel1.Controls.Add(this.lblCN);
             this.panel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.panel1.Location = new System.Drawing.Point(362, 92);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.panel1.Location = new System.Drawing.Point(241, 60);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(333, 62);
+            this.panel1.Size = new System.Drawing.Size(222, 40);
             this.panel1.TabIndex = 3;
             // 
             // lblCN
             // 
             this.lblCN.AutoSize = true;
-            this.lblCN.Location = new System.Drawing.Point(9, 9);
-            this.lblCN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCN.Location = new System.Drawing.Point(6, 6);
             this.lblCN.Name = "lblCN";
             this.lblCN.Size = new System.Drawing.Size(0, 26);
             this.lblCN.TabIndex = 0;
@@ -207,11 +188,9 @@
             this.groupBox1.Controls.Add(this.txtUserName);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(13, 134);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.groupBox1.Location = new System.Drawing.Point(9, 87);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(703, 297);
+            this.groupBox1.Size = new System.Drawing.Size(469, 193);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Key Recovery";
@@ -219,17 +198,17 @@
             // lblMessages
             // 
             this.lblMessages.AutoSize = true;
-            this.lblMessages.Location = new System.Drawing.Point(24, 265);
-            this.lblMessages.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblMessages.Location = new System.Drawing.Point(16, 172);
             this.lblMessages.Name = "lblMessages";
-            this.lblMessages.Size = new System.Drawing.Size(0, 20);
+            this.lblMessages.Size = new System.Drawing.Size(0, 13);
             this.lblMessages.TabIndex = 10;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(13, 13);
+            this.label2.Location = new System.Drawing.Point(9, 8);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(225, 26);
             this.label2.TabIndex = 11;
@@ -239,17 +218,19 @@
             // 
             this.cboCA.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboCA.FormattingEnabled = true;
-            this.cboCA.Location = new System.Drawing.Point(244, 13);
+            this.cboCA.Location = new System.Drawing.Point(163, 8);
+            this.cboCA.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cboCA.Name = "cboCA";
-            this.cboCA.Size = new System.Drawing.Size(759, 34);
+            this.cboCA.Size = new System.Drawing.Size(507, 34);
             this.cboCA.TabIndex = 12;
-            //this.cboCA.SelectedIndexChanged += new System.EventHandler(this.cboCA_SelectedIndexChanged);
+            this.cboCA.SelectedIndexChanged += new System.EventHandler(this.cboCA_SelectedIndexChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(15, 74);
+            this.label3.Location = new System.Drawing.Point(10, 48);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(212, 26);
             this.label3.TabIndex = 13;
@@ -260,10 +241,12 @@
             // 
             this.cboTemplate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboTemplate.FormattingEnabled = true;
-            this.cboTemplate.Location = new System.Drawing.Point(245, 74);
+            this.cboTemplate.Location = new System.Drawing.Point(163, 48);
+            this.cboTemplate.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cboTemplate.Name = "cboTemplate";
-            this.cboTemplate.Size = new System.Drawing.Size(759, 34);
+            this.cboTemplate.Size = new System.Drawing.Size(507, 34);
             this.cboTemplate.TabIndex = 14;
+            this.cboTemplate.SelectedIndexChanged += new System.EventHandler(this.cboTemplate_SelectedIndexChanged);
             // 
             // backgroundWorker1
             // 
@@ -271,9 +254,9 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1017, 445);
+            this.ClientSize = new System.Drawing.Size(678, 289);
             this.Controls.Add(this.cboTemplate);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.cboCA);
@@ -282,7 +265,6 @@
             this.Controls.Add(this.btnAbout);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "Form1";
             this.Text = "KRTool";
             this.panel1.ResumeLayout(false);

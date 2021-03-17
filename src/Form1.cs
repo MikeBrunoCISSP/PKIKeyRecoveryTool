@@ -135,7 +135,7 @@ namespace PKIKeyRecovery
             {
                 if (user.HasArchivedCerts())
                 {
-                    if (!user.recoverKeysFromCA(password, false, rbtnEDiscovery.Checked))
+                    if (!user.RecoverKeysFromCA(password, false, rbtnEDiscovery.Checked))
                     {
                         conf.Log.Error($"Problems were encountered when attempting recovery keys for user \"{username}\"");
                         return false;
@@ -178,7 +178,7 @@ namespace PKIKeyRecovery
 
                 if (currentUser.valid)
                 {
-                    if (currentUser.recoverKeysFromCA(password, true, false))
+                    if (currentUser.RecoverKeysFromCA(password, true, false))
                     {
                         conf.Log.Verbose("Key recovery for user " + username + " succeeded.");
                         if (currentUser.HasArchivedCerts())
@@ -187,9 +187,9 @@ namespace PKIKeyRecovery
                             anyKeysRecovered = 1;
                             if (currentUser.hasMergedPFX())
                             {
-                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
+                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.MergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
                                 mergedKeys++;
-                                pfxFiles.Add(currentUser.mergedPFX);
+                                pfxFiles.Add(currentUser.MergedPFX);
                             }
                             else
                             {
@@ -212,9 +212,9 @@ namespace PKIKeyRecovery
                             anyKeysRecovered = 1;
                             if (currentUser.hasMergedPFX())
                             {
-                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.mergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
+                                conf.Log.Verbose("User \"" + username + " has a combined PFX file: \"" + currentUser.MergedPFX + "\" this PFX file will be merged into the combined PFX file for this recovery request.");
                                 mergedKeys++;
-                                pfxFiles.Add(currentUser.mergedPFX);
+                                pfxFiles.Add(currentUser.MergedPFX);
                             }
                             else
                             {
@@ -356,10 +356,10 @@ namespace PKIKeyRecovery
             {
                 email = conf.DiscoveryEmail;
                 subject = "Recovered Encryption Keys for (" + user.getCN() + ")";
-                message = conf.Legal_Message.Replace("[PASSWORD]", password).Replace("[PATH]", user.legalDiscoveryKeyRetrievalLocation);
-                if (conf.Legal_AttachKeyToEmail & user.keysMerged)
+                message = conf.Legal_Message.Replace("[PASSWORD]", password).Replace("[PATH]", user.LegalDiscoveryKeyRetrievalLocation);
+                if (conf.Legal_AttachKeyToEmail & user.KeysMerged)
                 {
-                    stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailhost);
+                    stdlib.SendMail(from, email, subject, message, user.MergedPFX, conf.mailhost);
                     conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
                 }
 
@@ -386,11 +386,11 @@ namespace PKIKeyRecovery
                 message = conf.PC_Message.Replace("[PASSWORD]", password).Replace("[NAME]", user.firstName());
 
                 if (conf.pc_keyRetrievalLocationDefined)
-                    message = message.Replace("[PATH]", user.keyRetrievalLocation);
+                    message = message.Replace("[PATH]", user.KeyRetrievalLocation);
 
-                if (conf.PC_AttachKeyToEmail & user.keysMerged)
+                if (conf.PC_AttachKeyToEmail & user.KeysMerged)
                 {
-                    stdlib.SendMail(from, email, subject, message, user.mergedPFX, conf.mailhost);
+                    stdlib.SendMail(from, email, subject, message, user.MergedPFX, conf.mailhost);
                     conf.Log.Info("Email sent to \"" + email + "\".  Key file was attached.");
                 }
                 else

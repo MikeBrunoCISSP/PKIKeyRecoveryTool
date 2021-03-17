@@ -7,6 +7,8 @@ namespace PKIKeyRecovery
 {
     public partial class Config : Form
     {
+        internal Configuration Conf = null;
+
         private bool destDirSet = false;
         private bool discDirSet = false;
         private bool useEmail = false;
@@ -20,9 +22,9 @@ namespace PKIKeyRecovery
         public Config()
         {
             InitializeComponent();
-            if (File.Exists(Configuration.ConfFile))
+            if (File.Exists(Constants.ConfFile))
             {
-                var conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Configuration.ConfFile));
+                var conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
 
                 if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
                 {
@@ -50,6 +52,7 @@ namespace PKIKeyRecovery
                 smtpPortSet = true;
 
                 rbtnAttachYes.Checked = conf.AttachToEmail;
+                rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
 
                 txtDiscEmail.Text = conf.DiscoveryEmail;
                 if (txtDiscEmail.Text.IsValidEmail())
@@ -183,7 +186,7 @@ namespace PKIKeyRecovery
 
         private void btnApply_Click(object sender, EventArgs e)
         {
-            var conf = new Configuration()
+            Conf = new Configuration()
             {
                 DestinationDirectory = txtDestDir.Text,
                 PasswordLength = trkPwdLength.Value
@@ -191,17 +194,19 @@ namespace PKIKeyRecovery
 
             if (rbtnEmailYes.Checked)
             {
-                conf.UseEmail = true;
-                conf.SenderEmail = txtSenderEmail.Text;
-                conf.DiscoveryEmail = txtDiscEmail.Text;
-                conf.SmtpServer = txtSmtpServer.Text;
-                conf.SmtpPassword = Configuration.Protect(txtSmtpPassword.Text);
-                conf.SmtpPort = Convert.ToInt32(txtSmtpPort.Text);
-                conf.AttachToEmail = rbtnAttachYes.Checked;
+                Conf.UseEmail = true;
+                Conf.SenderEmail = txtSenderEmail.Text;
+                Conf.DiscoveryEmail = txtDiscEmail.Text;
+                Conf.SmtpServer = txtSmtpServer.Text;
+                Conf.SmtpPassword = Configuration.Protect(txtSmtpPassword.Text);
+                Conf.SmtpPort = Convert.ToInt32(txtSmtpPort.Text);
+                Conf.AttachToEmail = rbtnAttachYes.Checked;
+                Conf.DeleteKeyAfterSending = rbtnDeleteYes.Checked;
             }
 
-            conf.Commit();
+            Conf.Commit();
             MessageBox.Show(@"Configuration saved.", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 

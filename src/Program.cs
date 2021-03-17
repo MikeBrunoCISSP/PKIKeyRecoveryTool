@@ -14,6 +14,8 @@ namespace PKIKeyRecovery
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            RuntimeContext.Init();
             Application.Run(new Config());
         }
     }

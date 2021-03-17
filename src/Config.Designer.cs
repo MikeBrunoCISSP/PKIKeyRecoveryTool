@@ -58,16 +58,21 @@ namespace PKIKeyRecovery
             this.btnApply = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.txtDiscDir = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.btnDiscBrowse = new System.Windows.Forms.Button();
             this.txtDiscEmail = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.btnDiscBrowse = new System.Windows.Forms.Button();
+            this.txtDiscDir = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.rbtnDeleteYes = new System.Windows.Forms.RadioButton();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.rbtnDeleteNo = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.trkPwdLength)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -204,6 +209,8 @@ namespace PKIKeyRecovery
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.panel3);
+            this.groupBox1.Controls.Add(this.label11);
             this.groupBox1.Controls.Add(this.panel2);
             this.groupBox1.Controls.Add(this.panel1);
             this.groupBox1.Controls.Add(this.lblInvalidServer);
@@ -372,6 +379,33 @@ namespace PKIKeyRecovery
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "eDiscovery";
             // 
+            // txtDiscEmail
+            // 
+            this.txtDiscEmail.Enabled = false;
+            this.txtDiscEmail.Location = new System.Drawing.Point(250, 95);
+            this.txtDiscEmail.Name = "txtDiscEmail";
+            this.txtDiscEmail.Size = new System.Drawing.Size(396, 32);
+            this.txtDiscEmail.TabIndex = 102;
+            // 
+            // label8
+            // 
+            this.label8.Location = new System.Drawing.Point(10, 95);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(220, 26);
+            this.label8.TabIndex = 103;
+            this.label8.Text = "eDiscovery Email:";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // btnDiscBrowse
+            // 
+            this.btnDiscBrowse.Location = new System.Drawing.Point(793, 43);
+            this.btnDiscBrowse.Name = "btnDiscBrowse";
+            this.btnDiscBrowse.Size = new System.Drawing.Size(108, 34);
+            this.btnDiscBrowse.TabIndex = 101;
+            this.btnDiscBrowse.Text = "Browse";
+            this.btnDiscBrowse.UseVisualStyleBackColor = true;
+            this.btnDiscBrowse.Click += new System.EventHandler(this.btnDiscBrowse_Click);
+            // 
             // txtDiscDir
             // 
             this.txtDiscDir.Enabled = false;
@@ -389,32 +423,45 @@ namespace PKIKeyRecovery
             this.label9.Text = "Recovery Directory:";
             this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnDiscBrowse
+            // label11
             // 
-            this.btnDiscBrowse.Location = new System.Drawing.Point(793, 43);
-            this.btnDiscBrowse.Name = "btnDiscBrowse";
-            this.btnDiscBrowse.Size = new System.Drawing.Size(108, 34);
-            this.btnDiscBrowse.TabIndex = 101;
-            this.btnDiscBrowse.Text = "Browse";
-            this.btnDiscBrowse.UseVisualStyleBackColor = true;
-            this.btnDiscBrowse.Click += new System.EventHandler(this.btnDiscBrowse_Click);
+            this.label11.Location = new System.Drawing.Point(-11, 347);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(241, 26);
+            this.label11.TabIndex = 101;
+            this.label11.Text = "Delete After Sending:";
+            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // txtDiscEmail
+            // rbtnDeleteYes
             // 
-            this.txtDiscEmail.Enabled = false;
-            this.txtDiscEmail.Location = new System.Drawing.Point(250, 95);
-            this.txtDiscEmail.Name = "txtDiscEmail";
-            this.txtDiscEmail.Size = new System.Drawing.Size(396, 32);
-            this.txtDiscEmail.TabIndex = 102;
+            this.rbtnDeleteYes.AutoSize = true;
+            this.rbtnDeleteYes.Location = new System.Drawing.Point(10, 3);
+            this.rbtnDeleteYes.Name = "rbtnDeleteYes";
+            this.rbtnDeleteYes.Size = new System.Drawing.Size(76, 30);
+            this.rbtnDeleteYes.TabIndex = 19;
+            this.rbtnDeleteYes.Text = "Yes";
+            this.rbtnDeleteYes.UseVisualStyleBackColor = true;
             // 
-            // label8
+            // panel3
             // 
-            this.label8.Location = new System.Drawing.Point(10, 95);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(220, 26);
-            this.label8.TabIndex = 103;
-            this.label8.Text = "eDiscovery Email:";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.panel3.Controls.Add(this.rbtnDeleteNo);
+            this.panel3.Controls.Add(this.rbtnDeleteYes);
+            this.panel3.Location = new System.Drawing.Point(240, 337);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(197, 40);
+            this.panel3.TabIndex = 102;
+            // 
+            // rbtnDeleteNo
+            // 
+            this.rbtnDeleteNo.AutoSize = true;
+            this.rbtnDeleteNo.Checked = true;
+            this.rbtnDeleteNo.Location = new System.Drawing.Point(109, 3);
+            this.rbtnDeleteNo.Name = "rbtnDeleteNo";
+            this.rbtnDeleteNo.Size = new System.Drawing.Size(65, 30);
+            this.rbtnDeleteNo.TabIndex = 20;
+            this.rbtnDeleteNo.TabStop = true;
+            this.rbtnDeleteNo.Text = "No";
+            this.rbtnDeleteNo.UseVisualStyleBackColor = true;
             // 
             // Config
             // 
@@ -450,6 +497,8 @@ namespace PKIKeyRecovery
             this.panel1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -491,5 +540,9 @@ namespace PKIKeyRecovery
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtDiscEmail;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.RadioButton rbtnDeleteNo;
+        private System.Windows.Forms.RadioButton rbtnDeleteYes;
+        private System.Windows.Forms.Label label11;
     }
 }

@@ -9,6 +9,8 @@ namespace PKIKeyRecovery
 {
     internal static class Extensions
     {
+        internal static Regex MatchHex = new Regex(RegexPatterns.NonHexChars);
+
         internal static bool IsValidEmail(this string expression)
         {
             try
@@ -20,6 +22,11 @@ namespace PKIKeyRecovery
             {
                 return false;
             }
+        }
+
+        internal static string OnlyHex(this string expression)
+        {
+            return Regex.Replace(expression, RegexPatterns.NonHexChars, string.Empty);
         }
     }
 }

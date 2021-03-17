@@ -4,359 +4,353 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using MJBLogger;
+using System.DirectoryServices.ActiveDirectory;
+using System.DirectoryServices.AccountManagement;
+using EasyPKIView;
+using MoreLinq;
 
 namespace PKIKeyRecovery
 {
     public class User
     {
+        private static List<string> domains;
+        private static bool domainsSet = false;
+
+        internal static List<string> Domains
+        {
+            get
+            {
+                if (!domainsSet)
+                {
+                    domains = new List<string>();
+                    using (var currentForest = Forest.GetCurrentForest())
+                    {
+                        foreach (var domain in currentForest.Domains)
+                        {
+                            domains.Add(domain.ToString());
+                        }
+                    }
+                    domainsSet = true;
+                }
+                return domains;
+            }
+        }
+
+        public string DisplayName { get; private set; } = string.Empty;
+        public string PrincipalName { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
+        public string sAMAccountName { get; private set; } = string.Empty;
+
+        public bool KeysMerged { get; private set; } = false;
+        public bool Exists { get; private set; } = false;
+        public bool AnyKeysRecovered => recoveredKeys > 0;
+
         Configuration conf;
 
-        public string mergedPFX,
-                      keyDirectory,
-                      keyRetrievalLocation,
-                      legalDiscoveryKeyRetrievalLocation;
-        string SAM,
-               UPN,
-               CN,
-               Email,
-               BLOBDirectory;
+        public string MergedPFX,
+                      KeyDirectory,
+                      KeyRetrievalLocation,
+                      LegalDiscoveryKeyRetrievalLocation,
+                      BLOBDirectory;
 
         List<Certificate> certs;
 
         public List<string> keyFiles;
 
         public bool valid,
-                    keysMerged,
-                    existsAndNotDisabled,
                     fullSuccess;
         bool hasArchivedCerts,
-             hasUnrecoverableKeys;
+             hasUnrecoverableKeys,
+             enabled;
 
         int recoveredKeys;
 
-        ActiveDirectoryExplorer ade;
+        public User(string username, ADCertificationAuthority CA)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                valid = false;
+                return;
+            }
 
-        //public User(string username,  Configuration config)
-        //{
-        //    conf = config;
-        //    if (username == null)
-        //    {
-        //        valid = false;
-        //        return;
-        //    }
+            keyFiles = new List<string>();
 
-        //    ade = new ActiveDirectoryExplorer(conf.ADDS_Domain, conf.ADDS_ContainerDN);
-        //    keyFiles = new List<string>();
+            GetUserDetails(username);
+            hasArchivedCerts = false;
+            hasUnrecoverableKeys = false;
+            KeysMerged = false;
+            fullSuccess = true;
+            recoveredKeys = 0;
+            int count;
+            RuntimeContext.Log.Info($"Current User: {username}");
 
-        //    existsAndNotDisabled = ade.UserExists(username, true);
-        //    hasArchivedCerts = false;
-        //    hasUnrecoverableKeys = false;
-        //    keysMerged = false;
-        //    fullSuccess = true;
-        //    recoveredKeys = 0;
-        //    int count;
-        //    conf.Log.Info("Current User: " + username);
+            BLOBDirectory = $"{RuntimeContext.Conf.WorkingDirectory}\\{sAMAccountName}_BLOBs\\";
+            KeyDirectory = $"{RuntimeContext.Conf.WorkingDirectory}\\{sAMAccountName}_Keys\\";
+            MergedPFX = $"{RuntimeContext.Conf.WorkingDirectory}\\{sAMAccountName}.pfx";
+            KeyRetrievalLocation = $"{RuntimeContext.Conf.DestinationDirectory}\\{sAMAccountName}.pfx";
+            LegalDiscoveryKeyRetrievalLocation = $"{RuntimeContext.Conf.DiscoveryDirectory}\\{sAMAccountName}.pfx";
 
-        //    SAM = username;
-        //    UPN = SAM + "@" + conf.ADDS_Domain;
-        //    CN = ade.GetCN(SAM);
-        //    Email = ade.GetEmail(SAM);
-        //    BLOBDirectory = conf.workingDirectory + SAM + "_BLOBs\\";
-        //    keyDirectory = conf.workingDirectory + SAM + "_Keys\\";
-        //    mergedPFX = conf.workingDirectory + SAM + ".pfx";
-        //    keyRetrievalLocation = conf.PC_KeyRetrievalLocation + SAM + ".pfx";
-        //    legalDiscoveryKeyRetrievalLocation = conf.Legal_KeyRetrievalLocation + SAM + ".pfx";
+            if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
+            {
+                RuntimeContext.Log.Verbose($"SAMAccountName: {sAMAccountName}");
+                RuntimeContext.Log.Verbose($"User Principal Name: {(Exists? PrincipalName : Constants.Unavailable)}");
+                RuntimeContext.Log.Verbose($"Display Name: {(Exists ? DisplayName : Constants.Unavailable)}");
+                RuntimeContext.Log.Verbose($"Email Address: {(Exists ? Email : Constants.Unavailable) }");
+                RuntimeContext.Log.Verbose($"BLOB Directory: {BLOBDirectory}");
+                RuntimeContext.Log.Verbose($"Key Directory: {KeyDirectory}");
+            }
+            count = GetCertificates(CA);
+            switch (count)
+            {
+                case -1:
+                    RuntimeContext.Log.Error($"Problem encountered enumerating certificates for user {sAMAccountName}");
+                    valid = false;
+                    return;
 
-        //    if (conf.Log.Level.GE(LogLevel.Verbose))
-        //    {
-        //        conf.Log.Verbose("SAMAccountName: " + SAM);
-        //        conf.Log.Verbose("User Principal Name: " + UPN);
-        //        conf.Log.Verbose("Common Name: " + CN);
-        //        conf.Log.Verbose("Email Address: " + Email);
-        //        conf.Log.Verbose("BLOB Directory: " + BLOBDirectory);
-        //        conf.Log.Verbose("Key Directory: " + keyDirectory);
-        //    }
-        //    count = getCertificates();
-        //    switch (count)
-        //    {
-        //        case -1:
-        //            conf.Log.Error("Problem encountered enumerating certificates for user " + SAM);
-        //            valid = false;
-        //            return;
+                case 0:
+                    RuntimeContext.Log.Info($"No certificates with archived keys found for user {sAMAccountName}");
+                    valid = true;
+                    return;
 
-        //        case 0:
-        //            conf.Log.Info("No certificates with archived keys found for user " + SAM);
-        //            valid = true;
-        //            return;
+                default:
+                    RuntimeContext.Log.Info($"{count} certificates found with archived keys for user {sAMAccountName}");
+                    hasArchivedCerts = true;
+                    valid = true;
+                    return;
+            }
+        }
 
-        //        default:
-        //            conf.Log.Info(count.ToString() + " certificates found with archived keys for user " + SAM);
-        //            hasArchivedCerts = true;
-        //            valid = true;
-        //            return;
-        //    }
-        //}
+        private int GetCertificates(ADCertificationAuthority CA)
+        {
+            Certificate crt;
+            string command,
+                   currentSN,
+                   templateName,
+                   templateOID;
 
-        //private int getCertificates()
-        //{
-        //    Certificate crt;
-        //    string command,
-        //           currentSN,
-        //           templateName,
-        //           templateOID;
+            int index;
+            int count = 0;
+            certs = new List<Certificate>();
 
-        //    int index;
-        //    int count = 0;
-        //    certs = new List<Certificate>();
+            RuntimeContext.Log.Info("Serial Numbers of Certificates for which to recover keys:");
+            foreach (ADCertificateTemplate Template in CA.Templates.Where(p => p.RequiresPrivateKeyArchival))
+            {
+                index = 1;
+                templateName = Template.DisplayName;
+                templateOID = Template.Oid;
 
-        //    string[] tmp;
+                command = $"certutil -config {CA.Config} -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
+                var Output = Shell.exec(command, command, RuntimeContext.Log);
+                foreach (string record in Output)
+                {
+                    try
+                    {
+                        if (record.Contains("Serial Number:"))
+                        {
+                            count++;
+                            currentSN = record.Split(':')[1].OnlyHex();
+                            if (!record.Contains(@"EMPTY"))
+                            {
+                                RuntimeContext.Log.Info($"Current serial number: {currentSN}");
+                                crt = new Certificate(currentSN,
+                                                      templateName,
+                                                      CA.Config,
+                                                      sAMAccountName,
+                                                      BLOBDirectory,
+                                                      KeyDirectory,
+                                                      index,
+                                                      RuntimeContext.Log);
 
-        //    conf.Log.Info("Serial Numbers of Certificates for which to recover keys:");
-        //    foreach (KeyValuePair<string,string> template in conf.templates)
-        //    {
-        //        index = 1;
-        //        templateName = template.Key;
-        //        templateOID = template.Value;
+                                certs.Add(crt);
+                                index++;
+                            }
 
-        //        command = "certutil -config " + conf.CA + " -view -restrict " + "\"UPN=" + UPN + ",CertificateTemplate=" + templateOID + "\" -out SerialNumber";
-        //        Array SNs = Shell.exec(command, command, conf.Log);
-        //        foreach (string record in SNs)
-        //        {
-        //            try
-        //            {
-        //                if (stdlib.InString(record, "Serial Number:"))
-        //                {
-        //                    count++;
-        //                    currentSN = stdlib.clean(stdlib.Split(record, ':', 1));
-        //                    if (!(String.Equals(currentSN, "EMPTY")))
-        //                    {
-        //                        conf.Log.Info("     " + currentSN);
-        //                        crt = new Certificate(currentSN,
-        //                                              templateName,
-        //                                              conf.CA,
-        //                                              SAM,
-        //                                              BLOBDirectory,
-        //                                              keyDirectory,
-        //                                              index,
-        //                                              conf.Log);
+                            else
+                                RuntimeContext.Log.Error("This entry in the certificate database for user \"" + sAMAccountName + "\" has \"EMPTY\" listed as the serial number.  Ignoring.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        RuntimeContext.Log.Exception(e, "An exception was encountered while enumerating certificates for user \"" + sAMAccountName + "\"");
+                        fullSuccess = false;
+                        return -1;
+                    }
+                }
+            }
+            return count;
+        }
 
-        //                        certs.Add(crt);
-        //                        index++;
-        //                    }
+        public bool RecoverKeysFromCA(string password, bool bulkRecovery, bool eDiscovery)
+        {
+            string copyLocation;
+            Folder.Create(BLOBDirectory, true);
+            Folder.Create(KeyDirectory, true);
+            foreach (Certificate crt in certs)
+            {
+                if (!(crt.recoverKey(password)))
+                    hasUnrecoverableKeys = true;
+                else
+                {
+                    recoveredKeys++;
+                    keyFiles.Add(crt.KeyFile);
+                }
+            }
 
-        //                    else
-        //                        conf.Log.Error("This entry in the certificate database for user \"" + SAM + "\" has \"EMPTY\" listed as the serial number.  Ignoring.");
-        //                }
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                conf.Log.Exception(e, "An exception was encountered while enumerating certificates for user \"" + SAM + "\"");
-        //                fullSuccess = false;
-        //                return -1;
-        //            }
-        //        }
-        //    }
-        //    return count;
-        //} //getCertificates
+            if (MergePFX(password))
+            {
+                KeysMerged = true;
 
-        //public bool recoverKeysFromCA(string password, bool bulkRecovery, bool eDiscovery)
-        //{
-        //    string copyLocation;
-        //    Folder.Create(BLOBDirectory, true);
-        //    Folder.Create(keyDirectory, true);
-        //    foreach (Certificate crt in certs)
-        //    {
-        //        if (!(crt.recoverKey(password)))
-        //            hasUnrecoverableKeys = true;
-        //        else
-        //        {
-        //            recoveredKeys++;
-        //            keyFiles.Add(crt.keyFile);
-        //        }
-        //    }
+                if (!bulkRecovery)
+                {
+                    if (!RuntimeContext.Conf.AttachToEmail)
+                    {
+                        RuntimeContext.Log.Verbose($"Copying merged PFX file \"{MergedPFX}\" to Key Retreival location: \"{KeyRetrievalLocation}\"");
+                        try
+                        {
+                            copyLocation = eDiscovery
+                                ? LegalDiscoveryKeyRetrievalLocation
+                                : KeyRetrievalLocation;
 
-        //    if (mergePFX(password))
-        //    {
-        //        keysMerged = true;
+                            File.Copy(MergedPFX, copyLocation, true);
+                            if (!File.Exists(KeyRetrievalLocation))
+                            {
+                                RuntimeContext.Log.Error("A problem was encountered when copying the merged PFX file to the Key Retreival Location");
+                                return false;
+                            }
+                        }
 
-        //        if (!bulkRecovery)
-        //        {
-        //            if (!conf.PC_AttachKeyToEmail & conf.pc_keyRetrievalLocationDefined)
-        //            {
-        //                conf.Log.Verbose("Copying merged PFX file \"" + mergedPFX + "\" to Key Retreival location: \"" + keyRetrievalLocation + "\"");
-        //                try
-        //                {
-        //                    if (eDiscovery)
-        //                        copyLocation = legalDiscoveryKeyRetrievalLocation;
-        //                    else
-        //                        copyLocation = keyRetrievalLocation;
+                        catch (Exception e)
+                        {
+                            RuntimeContext.Log.Exception(e, "A problem was encountered when copying the merged PFX file to the Key Retreival Location");
+                            return false;
+                        }
+                    }
+                }
 
-        //                    File.Copy(mergedPFX, copyLocation, true);
-        //                    if (!File.Exists(keyRetrievalLocation))
-        //                    {
-        //                        conf.Log.Error("A problem was encountered when copying the merged PFX file to the Key Retreival Location");
-        //                        return false;
-        //                    }
-        //                }
+                RuntimeContext.Log.Verbose($"Deleting key directory for user \"{sAMAccountName}\"");
+                Folder.Delete(KeyDirectory);
+            }
 
-        //                catch (Exception e)
-        //                {
-        //                    conf.Log.Exception(e, "A problem was encountered when copying the merged PFX file to the Key Retreival Location");
-        //                    return false;
-        //                }
-        //            }
-        //        }
+            RuntimeContext.Log.Verbose($"Deleting BLOB directory for user \"{sAMAccountName}\"");
+            Folder.Delete(BLOBDirectory);
+            if (hasUnrecoverableKeys)
+                ReportUnrecoveredKeys();
 
-        //        conf.Log.Verbose("Deleting key directory for user \"" + SAM + "\"");
-        //        Folder.Delete(keyDirectory);
-        //    }
+            return fullSuccess;
+        }
 
-        //    conf.Log.Verbose("Deleting BLOB directory for user \"" + SAM + "\"");
-        //    Folder.Delete(BLOBDirectory);
-        //    if (hasUnrecoverableKeys)
-        //        reportUnrecoveredKeys();
+        private bool MergePFX(string password)
+        {
+            var KeyList = new List<string>();
+            string command, sanitizedCommand;
 
-        //    return fullSuccess;
-        //}
+            switch (recoveredKeys)
+            {
+                case 0:
+                    break;
+                case 1:
+                    var recoveredCert = certs.First();
+                    if (!File.Exists(recoveredCert.KeyFile))
+                    {
+                        RuntimeContext.Log.Error($"File not found \"{recoveredCert.KeyFile}\"");
+                        return false;
+                    }
+                    File.Copy(recoveredCert.KeyFile, MergedPFX);
+                    break;
+                default:
+                    certs.Where(p => p.recovered)
+                     .ForEach(q => KeyList.Add(q.KeyFile));
 
-        //private bool mergePFX(string password)
-        //{
-        //    string keyList = String.Empty;
-        //    string command, sanitizedCommand;
-        //    if (recoveredKeys > 1)
-        //    {
-        //        #region Create_keyList
-        //        foreach (Certificate c in certs)
-        //        {
-        //            if (c.recovered)
-        //            {
-        //                if (keyList == String.Empty)
-        //                    keyList += "\"" + c.getKeyFile();
-        //                else
-        //                    keyList += "," + c.getKeyFile();
-        //            }
-        //        }
-        //        keyList += "\"";
-        //        #endregion
+                    RuntimeContext.Log.Info($"Attempting to merge PFX files for user \"{sAMAccountName}\"");
+                    command = $"certutil -p \"{password},{password}\" -mergepfx -user \"{string.Join(@",", KeyList)}\" \"{MergedPFX}\"";
+                    sanitizedCommand = command.Replace(password, "[password]");
+                    Shell.executeAndLog(command, sanitizedCommand, RuntimeContext.Log);
+                    break;
+            }
 
-        //        conf.Log.Info("Attempting to merge PFX files for user \"" + SAM + "\"");
-        //        command = "certutil -p \"" + password + "," + password + "\" -mergepfx -user " + keyList + " \"" + mergedPFX + "\"";
-        //        sanitizedCommand = command.Replace(password, "[password]");
-        //        Shell.executeAndLog(command, sanitizedCommand, conf.Log);
-        //    }
+            if (File.Exists(MergedPFX))
+            {
+                RuntimeContext.Log.Info($"Successfully created merged PFX file \"{MergedPFX}\"");
+                return true;
+            }
+            else
+            {
+                RuntimeContext.Log.Error("Could not merge PFX files");
+                return false;
+            }
+        }
 
-        //    else
-        //    {
-        //        if (recoveredKeys == 1)
-        //        {
-        //            foreach (Certificate d in certs)
-        //            {
-        //                if (!File.Exists(d.getKeyFile()))
-        //                {
-        //                    conf.Log.Error("File not found \"" + d.getKeyFile() + "\"");
-        //                    return false;
-        //                }
-        //                File.Copy(d.getKeyFile(), mergedPFX);
-        //            }
-        //        }
+        private void ReportUnrecoveredKeys()
+        {
+            RuntimeContext.Log.Warning($"There were unrecovered keys for {sAMAccountName}");
+            certs.Where(p => !p.recovered)
+                 .ForEach(q => q.Report());
+        }
 
-        //        else
-        //        {
-        //            conf.Log.Error("No keys could be recovered for user \"" + SAM + "\"");
-        //            return false;
-        //        }
-        //    }
+        public void CleanUp(bool isBulkRecovery)
+        {
+            RuntimeContext.Log.Info($"Removing temporary files and folders created during key recovery for \"{sAMAccountName}\"");
 
-        //    if (File.Exists(mergedPFX))
-        //    {
-        //        conf.Log.Info("Successfully created merged PFX file \"" + mergedPFX + "\"");
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        conf.Log.Error("Could not merge PFX files");
-        //        return false;
-        //    }
-        //}
+            RuntimeContext.Log.Verbose($"Attempting to delete folder \"{BLOBDirectory}\"");
+            if (!Folder.Delete(BLOBDirectory))
+            {
+                RuntimeContext.Log.Warning($"Unabled to delete folder \"{BLOBDirectory}\"");
+            }
 
-        //private void reportUnrecoveredKeys()
-        //{
-        //    conf.Log.Error("There were unrecovered keys for " + SAM);
-        //    foreach (Certificate crt in certs)
-        //    {
-        //        if (!crt.recovered)
-        //            conf.Log.Info("     Serial Number: " + crt.getSerialNumber() + "     Certificate Template: " + crt.getTemplate());
-        //    }
-        //}
+            RuntimeContext.Log.Verbose($"Attempting to delete folder \"{KeyDirectory}\"");
+            if (!Folder.Delete(BLOBDirectory))
+            {
+                RuntimeContext.Log.Warning($"Unabled to delete folder \"{KeyDirectory}\"");
+            }
 
-        //public string getCN()
-        //{
-        //    return CN;
-        //}
+            if (!isBulkRecovery && RuntimeContext.Conf.DeleteKeyAfterSending)
+            {
+                RuntimeContext.Log.Verbose($"Attempting to delete file \"{MergedPFX}\"");
+                if (!stdlib.DeleteFile(MergedPFX, RuntimeContext.Log))
+                {
+                    RuntimeContext.Log.Warning($"Unabled to delete file \"{MergedPFX}\"");
+                }
+                else
+                {
+                    RuntimeContext.Log.Verbose($"Attempting to delete working directory \"{RuntimeContext.Conf.WorkingDirectory}\"");
+                    if (!Folder.Delete(RuntimeContext.Conf.WorkingDirectory))
+                    {
+                        RuntimeContext.Log.Warning("Unabled to delete working directory");
+                    }
+                }
+            }
+        }
 
-        //public string getEmail()
-        //{
-        //    return Email;
-        //}
+        internal void GetUserDetails(string sAMAccountName)
+        {
+            this.sAMAccountName = sAMAccountName;
 
-        //public string getSAM()
-        //{
-        //    return SAM;
-        //}
+            foreach(string domain in Domains)
+            {
+                using (var DomainContext = new PrincipalContext(ContextType.Domain, domain))
+                using (var Result = UserPrincipal.FindByIdentity(DomainContext, IdentityType.SamAccountName, sAMAccountName))
+                {
+                    if (null != Result)
+                    {
+                        Exists = true;
+                        this.sAMAccountName = Result.SamAccountName;
+                        Email = Result.EmailAddress;
+                        PrincipalName = Result.UserPrincipalName;
+                        DisplayName = Result.DisplayName;
 
-        //public bool HasArchivedCerts()
-        //{
-        //    return hasArchivedCerts;
-        //}
-
-        //public bool hasMergedPFX()
-        //{
-        //    return keysMerged;
-        //}
-
-        //public bool AnyKeysRecovered()
-        //{
-        //    if (recoveredKeys > 0)
-        //        return true;
-        //    else
-        //        return false;
-        //}
-
-        //public bool exists()
-        //{
-        //    return ade.UserExists(SAM, false);
-        //}
-
-        //public string firstName()
-        //{
-        //    return ade.GetFirstName(SAM);
-        //}
-
-        //public void cleanUp(bool isBulkRecovery)
-        //{
-        //    conf.Log.Info("Removing temporary files and folders created during key recovery for \"" + SAM + "\"");
-
-        //    conf.Log.Verbose("Attempting to delete folder \"" + BLOBDirectory + "\"");
-        //    if (!Folder.Delete(BLOBDirectory))
-        //        conf.Log.Warning("Unabled to delete folder \"" + BLOBDirectory + "\"");
-
-        //    conf.Log.Verbose("Attempting to delete folder \"" + keyDirectory + "\"");
-        //    if (!Folder.Delete(BLOBDirectory))
-        //        conf.Log.Warning("Unabled to delete folder \"" + keyDirectory + "\"");
-
-        //    if (!isBulkRecovery & conf.PC_DeleteKeyAfterSending)
-        //    {
-        //        conf.Log.Verbose("Attempting to delete file \"" + mergedPFX + "\"");
-        //        if (!stdlib.DeleteFile(mergedPFX, conf.Log))
-        //            conf.Log.Warning("Unabled to delete file \"" + mergedPFX + "\"");
-        //        else
-        //        {
-        //            conf.Log.Verbose("Attempting to delete working directory \"" + conf.workingDirectory + "\"");
-        //            if (!Folder.Delete(conf.workingDirectory))
-        //                conf.Log.Warning("Unabled to delete working directory");
-        //        }
-        //    }
-        //}
+                        try
+                        {
+                            enabled = (bool)Result.Enabled;
+                        }
+                        catch
+                        {
+                            enabled = false;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
 
     } //class User
 }

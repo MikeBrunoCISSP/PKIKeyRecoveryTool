@@ -107,7 +107,18 @@ using System.Linq;
             return groupMembers;
         }
 
-        public bool UserExists(string username, bool returnFalseIfDisabled)
+    public bool DoesUserExist(string userName)
+    {
+        using (var domainContext = new PrincipalContext(ContextType.Domain, "DOMAIN"))
+        {
+            using (var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, userName))
+            {
+                return foundUser != null;
+            }
+        }
+    }
+
+    public bool UserExists(string username, bool returnFalseIfDisabled)
         {
             if (String.Equals(username, ""))
                 return false;

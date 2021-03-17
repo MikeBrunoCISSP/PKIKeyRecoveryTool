@@ -47,5 +47,12 @@ namespace PKIKeyRecovery
     internal static class Constants
     {
         internal const string InvalidEmail = @"Invalid Email";
+        internal const string ConfFile = @"KRTool.cfg";
+        internal const string Unavailable = nameof(Unavailable);
+    }
+
+    internal static class RegexPatterns
+    {
+        internal const string NonHexChars = @"[^a-fA-F0-9]";
     }
 }

@@ -25,7 +25,6 @@ namespace PKIKeyRecovery
     {
         public MJBLog Log = new MJBLog();
 
-        internal static readonly string ConfFile = @"KRTool.cfg";
         public string DestinationDirectory { get; set; } = string.Empty;
         
         public string DiscoveryDirectory { get; set; } = string.Empty;
@@ -54,6 +53,7 @@ namespace PKIKeyRecovery
         public int SmtpPort { get; set; } = 25;
 
         public bool AttachToEmail { get; set; } = false;
+        public bool DeleteKeyAfterSending { get; set; } = false;
 
         public string DiscoveryEmail { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
@@ -68,14 +68,14 @@ namespace PKIKeyRecovery
 
         public void Commit()
         {
-            if (File.Exists(ConfFile))
+            if (File.Exists(Constants.ConfFile))
             {
-                File.Delete(ConfFile);
+                File.Delete(Constants.ConfFile);
             }
 
             var unprettyJson = JsonConvert.SerializeObject(this);
             var formattedJson = JToken.Parse(unprettyJson).ToString(Formatting.Indented);
-            File.WriteAllText(ConfFile, formattedJson);
+            File.WriteAllText(Constants.ConfFile, formattedJson);
         }
 
 

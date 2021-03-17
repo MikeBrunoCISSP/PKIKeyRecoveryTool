@@ -18,71 +18,19 @@ namespace PKIKeyRecovery
     public partial class Form1
     {
         private static PrincipalContext AdContext = new PrincipalContext(ContextType.Domain);
-        private MJBLog Log;
         private List<ADCertificationAuthority> CAs = new List<ADCertificationAuthority>();
         private Configuration Config;
-
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            BackgroundWorker helperBW = sender as BackgroundWorker;
-            e.Result = PleaseWait(helperBW);
-            if ((int)e.Result < 1)
-            {
-                MessageBox.Show(@"No enterprise certification authorities advertising templates with archived keys were found in Active Directory", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-        }
-
-        private int PleaseWait(BackgroundWorker bw)
-        {
-            var WaitForm = new PleaseWait();
-            WaitForm.ShowDialog();
-            CAs = ADCertificationAuthority.GetAll()
-                                          .Where(p => p.Templates.Where(q => q.RequiresPrivateKeyArchival).Any()).ToList();
-            WaitForm.Close();
-            return CAs.Count();
-        }
 
         private void InitializeContext()
         {
             //Config = new Configuration();
-            Log = new MJBLog();
-            Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
-            Log.Banner();
-            Log.Verbose(@"Enumerating all Enterprise CAs existing in AD...");
+            RuntimeContext.Log = new MJBLog();
+            RuntimeContext.Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
+            RuntimeContext.Log.Banner();
+            RuntimeContext.Log.Verbose(@"Enumerating all Enterprise CAs existing in AD...");
 
-            using (var WaitForm = new PleaseWait())
-            {
-                WaitForm.Show();
-                WaitForm.Update();
-                CAs = ADCertificationAuthority.GetAll()
-                                              .Where(p => p.Templates.Where(q => q.RequiresPrivateKeyArchival).Any()).ToList();
-            }
-
-            if (CAs.Count < 1)
-            {
-                MessageBox.Show(@"No enterprise certification authorities advertising templates with archived keys were found in Active Directory", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-
-            cboCA.DataSource = CAs;
+            cboCA.DataSource = RuntimeContext.CAs;
             cboCA.DisplayMember = nameof(ADCertificationAuthority.Config);
-        }
-
-        private UserStatus GetUserStatus(string username)
-        {
-            var searcher = new PrincipalSearcher(new UserPrincipal(AdContext) { SamAccountName = username});
-            var Result = searcher.FindOne();
-
-            if (null == Result || !(Result is UserPrincipal))
-            {
-                return new UserStatus(username, false, false);
-            }
-            else
-            {
-                return new UserStatus(Result);
-            }
-
         }
     }
 }
