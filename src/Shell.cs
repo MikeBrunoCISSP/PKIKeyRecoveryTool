@@ -5,118 +5,115 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using MJBLogger;
+using MoreLinq;
 
-
-class Shell
+namespace PKIKeyRecovery
 {
-    const int DEBUG = 4;
-    const int INFO = 3;
-    const int WARNING = 2;
-    const int ERROR = 1;
-    const int CRITICAL = 0;
-
-    public static string[] exec(string command)
+    class Shell
     {
-        string output = ExecuteCommand(command);
+        const int DEBUG = 4;
+        const int INFO = 3;
+        const int WARNING = 2;
+        const int ERROR = 1;
+        const int CRITICAL = 0;
 
-        if (output != null)
-            return output.Split('\n');
-        else
-            return null;
-    }
-    
-    public static string[] exec(string command, string sanitizedCommand, MJBLog Log)
-    {
-        Log.Verbose("Command: \"" + sanitizedCommand + "\"");
-        string output = ExecuteCommand(command);
-
-        if (output != null)
+        public static string[] Exec(string command)
         {
-            string[] lines = output.Split('\n');
-            if (Log.Level.GE(LogLevel.Verbose))
+            string output = ExecuteCommand(command);
+
+            if (output != null)
+                return output.Split('\n');
+            else
+                return null;
+        }
+
+        public static string[] Exec(string command, string sanitizedCommand)
+        {
+            RuntimeContext.Log.Verbose($"Command: \"{sanitizedCommand}\"");
+            string output = ExecuteCommand(command);
+
+            if (output != null)
             {
-                Log.Verbose("Command Result:");
-                foreach (string line in lines)
+                string[] lines = output.Split('\n');
+                if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
                 {
-                    Log.Echo(line);
+                    RuntimeContext.Log.Verbose("Command Result:");
+                    lines.ForEach(line => RuntimeContext.Log.Echo(line));
                 }
+                return lines;
             }
-            return lines;
-        }
-        else
-            return null;
-    }
-
-    public static bool executeAndVerify(string command, string successIndicator)
-    {
-        string output = ExecuteCommand(command);
-        return stdlib.InString(output, successIndicator);
-    }
-
-    public static bool executeAndVerify(string command, string successIndicator, int requiredInstancesOfSuccessIndicator)
-    {
-        string output = ExecuteCommand(command);
-        return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
-    }
-
-    public static string executeAndLog(string command, string sanitizedCommand, MJBLog Log)
-    {
-        Log.Verbose("Command : " + sanitizedCommand);
-        string output = ExecuteCommand(command);
-
-        if (Log.Level.GE(LogLevel.Verbose))
-        {
-            Log.Verbose("Command Result:");
-
-            string[] lines = Regex.Split(output, "\r\n");
-            foreach (string line in lines)
+            else
             {
-                Log.Echo(line);
+                return null;
             }
         }
 
-        return output;
-    }
-
-    public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator, MJBLog Log)
-    {
-        Log.Verbose("Command : " + sanitizedCommand);
-        string output = ExecuteCommand(command);
-        Log.Verbose("Command Result:");
-
-        if (Log.Level.GE(LogLevel.Verbose))
+        public static bool executeAndVerify(string command, string successIndicator)
         {
-            string[] lines = Regex.Split(output, "\r\n");
-            foreach (string line in lines)
+            string output = ExecuteCommand(command);
+            return stdlib.InString(output, successIndicator);
+        }
+
+        public static bool executeAndVerify(string command, string successIndicator, int requiredInstancesOfSuccessIndicator)
+        {
+            string output = ExecuteCommand(command);
+            return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
+        }
+
+        public static string ExecuteAndLog(string command, string sanitizedCommand)
+        {
+            RuntimeContext.Log.Verbose($"Command : {sanitizedCommand}");
+            string output = ExecuteCommand(command);
+
+            if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
             {
-                Log.Echo(line);
+                RuntimeContext.Log.Verbose("Command Result:");
+
+                Regex.Split(output, "\r\n")
+                     .ForEach(line => RuntimeContext.Log.Echo(line));
             }
+
+            return output;
         }
 
-        return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
-    }
-
-    private static string ExecuteCommand(string command)
-    {
-        try
+        public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator)
         {
-            ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command);
-            procStartInfo.RedirectStandardOutput = true;
-            procStartInfo.UseShellExecute = false;
-            procStartInfo.CreateNoWindow = true;
+            RuntimeContext.Log.Verbose($"Command : {sanitizedCommand}");
+            string output = ExecuteCommand(command);
 
-            Process proc = new Process();
-            proc.StartInfo = procStartInfo;
-            proc.Start();
+            if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
+            {
+                RuntimeContext.Log.Verbose("Command Result:");
 
-            string output = proc.StandardOutput.ReadToEnd();
-            proc.WaitForExit();
-            return (output);
+                Regex.Split(output, "\r\n")
+                     .ForEach(line => RuntimeContext.Log.Echo(line));
+            }
+
+            return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
         }
 
-        catch (Exception)
+        private static string ExecuteCommand(string command)
         {
-            return null;
+            try
+            {
+                ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command);
+                procStartInfo.RedirectStandardOutput = true;
+                procStartInfo.UseShellExecute = false;
+                procStartInfo.CreateNoWindow = true;
+
+                Process proc = new Process();
+                proc.StartInfo = procStartInfo;
+                proc.Start();
+
+                string output = proc.StandardOutput.ReadToEnd();
+                proc.WaitForExit();
+                return (output);
+            }
+
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

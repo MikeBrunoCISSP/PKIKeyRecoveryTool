@@ -66,7 +66,7 @@ namespace PKIKeyRecovery
 
             string command = "certutil | find \"Config:\"";
             BindingList<string> entries = new BindingList<string>();
-            string[] lines = Shell.exec(command);
+            string[] lines = Shell.Exec(command);
             foreach (string line in lines)
             {
                 if (stdlib.InString(line, "Config:"))

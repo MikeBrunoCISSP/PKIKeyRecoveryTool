@@ -223,7 +223,6 @@
             this.cboCA.Name = "cboCA";
             this.cboCA.Size = new System.Drawing.Size(507, 34);
             this.cboCA.TabIndex = 12;
-            this.cboCA.SelectedIndexChanged += new System.EventHandler(this.cboCA_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -246,11 +245,6 @@
             this.cboTemplate.Name = "cboTemplate";
             this.cboTemplate.Size = new System.Drawing.Size(507, 34);
             this.cboTemplate.TabIndex = 14;
-            this.cboTemplate.SelectedIndexChanged += new System.EventHandler(this.cboTemplate_SelectedIndexChanged);
-            // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             // 
             // Form1
             // 

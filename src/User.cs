@@ -42,8 +42,10 @@ namespace PKIKeyRecovery
         public string sAMAccountName { get; private set; } = string.Empty;
 
         public bool KeysMerged { get; private set; } = false;
+        public bool HasMergedPfx { get; private set; } = false;
         public bool Exists { get; private set; } = false;
         public bool AnyKeysRecovered => recoveredKeys > 0;
+        public bool HasArchivedCerts => certs.Count > 0;
 
         Configuration conf;
 
@@ -53,7 +55,7 @@ namespace PKIKeyRecovery
                       LegalDiscoveryKeyRetrievalLocation,
                       BLOBDirectory;
 
-        List<Certificate> certs;
+        List<Certificate> certs = new List<Certificate>();
 
         public List<string> keyFiles;
 
@@ -78,7 +80,6 @@ namespace PKIKeyRecovery
             GetUserDetails(username);
             hasArchivedCerts = false;
             hasUnrecoverableKeys = false;
-            KeysMerged = false;
             fullSuccess = true;
             recoveredKeys = 0;
             int count;
@@ -129,8 +130,6 @@ namespace PKIKeyRecovery
                    templateOID;
 
             int index;
-            int count = 0;
-            certs = new List<Certificate>();
 
             RuntimeContext.Log.Info("Serial Numbers of Certificates for which to recover keys:");
             foreach (ADCertificateTemplate Template in CA.Templates.Where(p => p.RequiresPrivateKeyArchival))
@@ -140,14 +139,13 @@ namespace PKIKeyRecovery
                 templateOID = Template.Oid;
 
                 command = $"certutil -config {CA.Config} -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
-                var Output = Shell.exec(command, command, RuntimeContext.Log);
+                var Output = Shell.Exec(command);
                 foreach (string record in Output)
                 {
                     try
                     {
                         if (record.Contains("Serial Number:"))
                         {
-                            count++;
                             currentSN = record.Split(':')[1].OnlyHex();
                             if (!record.Contains(@"EMPTY"))
                             {
@@ -158,8 +156,7 @@ namespace PKIKeyRecovery
                                                       sAMAccountName,
                                                       BLOBDirectory,
                                                       KeyDirectory,
-                                                      index,
-                                                      RuntimeContext.Log);
+                                                      index);
 
                                 certs.Add(crt);
                                 index++;
@@ -177,7 +174,7 @@ namespace PKIKeyRecovery
                     }
                 }
             }
-            return count;
+            return certs.Count;
         }
 
         public bool RecoverKeysFromCA(string password, bool bulkRecovery, bool eDiscovery)
@@ -187,7 +184,7 @@ namespace PKIKeyRecovery
             Folder.Create(KeyDirectory, true);
             foreach (Certificate crt in certs)
             {
-                if (!(crt.recoverKey(password)))
+                if (!(crt.RecoverKey(password)))
                     hasUnrecoverableKeys = true;
                 else
                 {
@@ -264,7 +261,8 @@ namespace PKIKeyRecovery
                     RuntimeContext.Log.Info($"Attempting to merge PFX files for user \"{sAMAccountName}\"");
                     command = $"certutil -p \"{password},{password}\" -mergepfx -user \"{string.Join(@",", KeyList)}\" \"{MergedPFX}\"";
                     sanitizedCommand = command.Replace(password, "[password]");
-                    Shell.executeAndLog(command, sanitizedCommand, RuntimeContext.Log);
+                    Shell.ExecuteAndLog(command, sanitizedCommand);
+                    HasMergedPfx = true;
                     break;
             }
 
@@ -306,7 +304,7 @@ namespace PKIKeyRecovery
             if (!isBulkRecovery && RuntimeContext.Conf.DeleteKeyAfterSending)
             {
                 RuntimeContext.Log.Verbose($"Attempting to delete file \"{MergedPFX}\"");
-                if (!stdlib.DeleteFile(MergedPFX, RuntimeContext.Log))
+                if (!stdlib.DeleteFile(MergedPFX))
                 {
                     RuntimeContext.Log.Warning($"Unabled to delete file \"{MergedPFX}\"");
                 }

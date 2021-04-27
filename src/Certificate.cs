@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using MJBLogger;
+using MoreLinq;
 
 namespace PKIKeyRecovery
 {
     public class Certificate
     {
         string BLOBFile,
-               CA;
+               CAConfig;
 
         public string KeyFile { get; private set; }
         public string SerialNumber { get; private set; }
@@ -26,52 +27,41 @@ namespace PKIKeyRecovery
                            string username, 
                            string BLOBDirectory, 
                            string keyDirectory, 
-                           int i, 
-                           MJBLog l)
+                           int i)
         {
             Template = tmpl;
             SerialNumber = sn;
-            CA = certificateAuthority;
+            CAConfig = certificateAuthority;
             index = i;
-            log = l;
 
-            BLOBFile = BLOBDirectory + username + "_" + Template + "(" + index + ").BLOB";
-            KeyFile = keyDirectory + username + "_" + Template + "(" + index + ").pfx";
+            BLOBFile = $"{BLOBDirectory}{username}_{Template}({index}).BLOB";
+            KeyFile = $"{keyDirectory}{username}_{Template}({index}).pfx";
 
             recovered = false;
-
-            if (log.Level.GE(LogLevel.Verbose))
-            {
-                log.Verbose("Serial Number: " + SerialNumber);
-                log.Verbose("Certificate Template Name: " + Template);
-                log.Verbose("Index: " + index);
-                log.Verbose("BLOB File Name: " + BLOBFile);
-                log.Verbose("Key File Name: " + KeyFile);
-            }
+            RuntimeContext.Log.PropertyReport(this, @"Certificate details", level: LogLevel.Verbose);
         }
 
-        public bool recoverKey(string password)
+        public bool RecoverKey(string password)
         {
-            if (makeBLOB())
+            if (MakeBLOB())
             {
                 string[] output;
-                string command = "certutil -recoverkey -p " + password + " \"" + BLOBFile + "\" \"" + KeyFile + "\"";
-                output = Shell.exec(command, command.Replace(password, "[password]"), log);
+                string command = $"certutil -recoverkey -p {password} \"{BLOBFile}\" \"{KeyFile}\"";
+                output = Shell.Exec(command, command.Replace(password, "[password]"));
                 if (File.Exists(KeyFile))
                 {
-                    log.Info("Key successfully recovered for " + Template + " certificate " + SerialNumber + " as " + KeyFile);
+                    RuntimeContext.Log.Info($"Key successfully recovered for {Template} certificate {SerialNumber} as {KeyFile}");
                     recovered = true;
                 }
                 else
                 {
-                    log.Error("Key could not be recovered for " + Template + " certificate " + SerialNumber);
-                    if (log.Level.GE(LogLevel.Error))
+                    RuntimeContext.Log.Error($"Key could not be recovered for {Template} certificate {SerialNumber}");
+                    if (RuntimeContext.Log.Level.GE(LogLevel.Error))
                     {
-                        log.Echo("Result of command:");
+                        RuntimeContext.Log.Echo("Result of command:");
                         try
                         {
-                            foreach (string line in output)
-                                log.Echo(line.Replace(password, "[password]"));
+                            output.ForEach(p => RuntimeContext.Log.Echo(p.Replace(password, @"[password]")));
                         }
                         catch (Exception) { }
                     }
@@ -86,19 +76,19 @@ namespace PKIKeyRecovery
             RuntimeContext.Log.Echo($"Certificate Template: {Template}");
         }
 
-        private bool makeBLOB()
+        private bool MakeBLOB()
         {
-            string command = "certutil -config " + CA + " -getkey " + SerialNumber + " " + "\"" + BLOBFile + "\"";
-            Shell.exec(command, command, log);
+            string command = $"certutil -config \"{CAConfig}\" -getkey {SerialNumber} \"{BLOBFile}\"";
+            Shell.Exec(command);
 
             if (File.Exists(BLOBFile))
             {
-                log.Info("BLOB for " + Template + " certificate " + SerialNumber + " saved as " + BLOBFile);
+                RuntimeContext.Log.Info($"BLOB for {Template} certificate {SerialNumber} saved as {BLOBFile} from CA {CAConfig}");
                 return true;
             }
             else
             {
-                log.Error("Unable to retreive BLOB for " + Template + " certificate " + SerialNumber);
+                RuntimeContext.Log.Error($"Unable to retreive BLOB for {Template} certificate {SerialNumber} from CA {CAConfig}");
                 return false;
             }
         }

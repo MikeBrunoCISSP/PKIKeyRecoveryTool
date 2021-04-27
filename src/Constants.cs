@@ -51,6 +51,19 @@ namespace PKIKeyRecovery
         internal const string Unavailable = nameof(Unavailable);
     }
 
+    internal static class Placeholders
+    {
+        internal const string Password = "[PASSWORD]";
+        internal const string Path = @"[PATH]";
+        internal const string Name = @"[NAME]";
+    }
+
+    internal static class MessageTemplates
+    {
+        internal static readonly string LegalDiscovery = $"The recovered encryption certificates and keys can be found at this location:\r\n{Placeholders.Path}\r\n\r\nThe password to unlock the file is:\r\n{Placeholders.Password}";
+        internal static readonly string User = $"Dear {Placeholders.Name},\r\n\r\nYour recovered encryption certificates and keys can be found at this location:\r\n{Placeholders.Path}\r\nThe password to unlock the file is:\r\n{Placeholders.Password}";
+    }
+
     internal static class RegexPatterns
     {
         internal const string NonHexChars = @"[^a-fA-F0-9]";
