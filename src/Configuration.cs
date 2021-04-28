@@ -23,8 +23,6 @@ namespace PKIKeyRecovery
 
     public class Configuration
     {
-        public MJBLog Log = new MJBLog();
-
         public string DestinationDirectory { get; set; } = string.Empty;
         
         public string DiscoveryDirectory { get; set; } = string.Empty;
@@ -34,21 +32,24 @@ namespace PKIKeyRecovery
         public bool UseEmail { get; set; } = false;
         public string SmtpServer { get; set; } = string.Empty;
 
+        public string SmtpUsername { get; set; } = string.Empty;
+        public bool SmtpUsernameSet => !string.IsNullOrEmpty(SmtpUsername);
+
         private string smtpPassword = string.Empty;
         public string SmtpPassword
         {
             get
             {
-                return smtpPassword;
+                return string.IsNullOrEmpty(smtpPassword)
+                    ? string.Empty
+                    : smtpPassword.UnProtect();
             }
             set
             {
-                smtpPassword = string.IsNullOrEmpty(value)
-                    ? string.Empty
-                    : Protect(value);
+                smtpPassword = value;
             }
         }
-        internal string PlainTextPassword => UnProtect(SmtpPassword);
+        public bool SmtpPasswordSet => !string.IsNullOrEmpty(smtpPassword);
 
         public int SmtpPort { get; set; } = 25;
 
@@ -76,26 +77,6 @@ namespace PKIKeyRecovery
             var unprettyJson = JsonConvert.SerializeObject(this);
             var formattedJson = JToken.Parse(unprettyJson).ToString(Formatting.Indented);
             File.WriteAllText(Constants.ConfFile, formattedJson);
-        }
-
-
-
-        public static string Protect(string plaintext)
-        {
-            return Convert.ToBase64String(
-                ProtectedData.Protect(
-                    Encoding.UTF8.GetBytes(plaintext)
-                    , null
-                    , DataProtectionScope.CurrentUser));
-        }
-
-        private static string UnProtect(string ciphertext)
-        {
-            return Encoding.UTF8.GetString(
-                ProtectedData.Unprotect(
-                    Convert.FromBase64String(ciphertext)
-                    , null
-                    , DataProtectionScope.CurrentUser));
         }
     }
 

@@ -14,10 +14,12 @@ namespace PKIKeyRecovery
         private bool useEmail = false;
         private bool smtpServerSet = false;
         private bool smtpPortSet = true;
+        private bool smtpUsernameSet = false;
+        private bool smtpPasswordSet = false;
         private bool discoveryEmailSet = false;
         private bool senderEmailSet = false;
 
-        private bool ConfigSet => destDirSet && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet);
+        private bool ConfigSet => destDirSet && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
 
         public Config()
         {
@@ -47,6 +49,9 @@ namespace PKIKeyRecovery
 
                 txtSmtpServer.Text = conf.SmtpServer;
                 smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+
+                txtSmtpUser.Text = conf.SmtpUsername;
+                txtSmtpPassword.Text = conf.SmtpPassword;
 
                 txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
                 smtpPortSet = true;
@@ -117,6 +122,7 @@ namespace PKIKeyRecovery
             useEmail = rbtnEmailYes.Checked;
             txtSmtpServer.Enabled = rbtnEmailYes.Checked;
             txtSmtpPort.Enabled = rbtnEmailYes.Checked;
+            txtSmtpUser.Enabled = rbtnEmailYes.Checked;
             txtSmtpPassword.Enabled = rbtnEmailYes.Checked;
             rbtnAttachYes.Enabled = rbtnEmailYes.Checked;
             rbtnAttachNo.Enabled = rbtnEmailYes.Checked;
@@ -173,6 +179,8 @@ namespace PKIKeyRecovery
             btnApply.Enabled = ConfigSet;
         }
 
+
+
         private void txtDestDir_TextChanged(object sender, EventArgs e)
         {
             btnApply.Enabled = ConfigSet;
@@ -198,7 +206,7 @@ namespace PKIKeyRecovery
                 Conf.SenderEmail = txtSenderEmail.Text;
                 Conf.DiscoveryEmail = txtDiscEmail.Text;
                 Conf.SmtpServer = txtSmtpServer.Text;
-                Conf.SmtpPassword = Configuration.Protect(txtSmtpPassword.Text);
+                Conf.SmtpPassword = txtSmtpPassword.Text.Protect();
                 Conf.SmtpPort = Convert.ToInt32(txtSmtpPort.Text);
                 Conf.AttachToEmail = rbtnAttachYes.Checked;
                 Conf.DeleteKeyAfterSending = rbtnDeleteYes.Checked;
@@ -217,6 +225,7 @@ namespace PKIKeyRecovery
 
         private void txtSmtpPassword_TextChanged(object sender, EventArgs e)
         {
+            smtpPasswordSet = !string.IsNullOrEmpty(txtSmtpPassword.Text);
             btnApply.Enabled = ConfigSet;
         }
 
@@ -245,6 +254,12 @@ namespace PKIKeyRecovery
             }
 
             return pathChosen;
+        }
+
+        private void txtSmtpUser_TextChanged(object sender, EventArgs e)
+        {
+            smtpUsernameSet = !string.IsNullOrEmpty(txtSmtpUser.Text);
+            btnApply.Enabled = ConfigSet;
         }
     }
 }
