@@ -15,12 +15,13 @@ namespace PKIKeyRecovery
 {
     public partial class Form1 : Form
     {
-        Configuration conf;
         public static string KRAgent = "";
         public static string bulkRecoveryMergedPFX,
                              bulkRecoveryRetrievalLocation;
         public static List<string> SerialNumbers;
         public static List<string> unrecoverableKeys;
+
+        internal User SelectedUser = null;
 
         public Form1()
         {
@@ -342,6 +343,32 @@ namespace PKIKeyRecovery
             cboTemplate.DisplayMember = nameof(ADCertificateTemplate.DisplayName);
             cboTemplate.Update();
             cboTemplate.SelectedIndex = -1;
+        }
+
+        private void txtUserName_TextChanged(object sender, EventArgs e)
+        {
+            btnValidate.Enabled = !string.IsNullOrEmpty(txtUserName.Text);
+            btnRecoverKeys.Enabled = false;
+            SelectedUser = null;
+            panel1.BackColor = SystemColors.Control;
+            lblCN.Text = string.Empty;
+        }
+
+        private void btnValidate_Click(object sender, EventArgs e)
+        {
+            SelectedUser = new User(txtUserName.Text, cboCA.SelectedValue as ADCertificationAuthority);
+            if (SelectedUser.Exists)
+            {
+                panel1.BackColor = Color.LightGreen;
+                lblCN.Text = SelectedUser.DisplayName;
+                btnRecoverKeys.Enabled = true;
+            }
+            else
+            {
+                panel1.BackColor = Color.Red;
+                lblCN.Text = Constants.UserNotFound;
+                btnRecoverKeys.Enabled = false;
+            }
         }
 
         //private bool SendEmail(User user, bool eDiscovery)

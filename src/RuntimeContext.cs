@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Windows.Forms;
 using System.IO;
+using System.DirectoryServices;
+using System.DirectoryServices.ActiveDirectory;
 using EasyPKIView;
 using MJBLogger;
 using Newtonsoft.Json;
+
 
 namespace PKIKeyRecovery
 {
@@ -50,10 +53,10 @@ namespace PKIKeyRecovery
                 }
             }
 
-            //Config = new Configuration();
             Log = new MJBLog();
             Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
             Log.Banner();
+
             Log.Verbose(@"Enumerating all Enterprise CAs existing in AD...");
 
             using (var WaitForm = new PleaseWait())
@@ -70,6 +73,5 @@ namespace PKIKeyRecovery
                 Application.Exit();
             }
         }
-
     }
 }

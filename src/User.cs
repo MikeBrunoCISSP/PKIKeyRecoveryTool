@@ -44,6 +44,7 @@ namespace PKIKeyRecovery
         public bool KeysMerged { get; private set; } = false;
         public bool HasMergedPfx { get; private set; } = false;
         public bool Exists { get; private set; } = false;
+        public bool HasEmailAddress { get; private set; } = false;
         public bool AnyKeysRecovered => recoveredKeys > 0;
         public bool HasArchivedCerts => certs.Count > 0;
 
@@ -319,7 +320,7 @@ namespace PKIKeyRecovery
             }
         }
 
-        internal void GetUserDetails(string sAMAccountName)
+        private void GetUserDetails(string sAMAccountName)
         {
             this.sAMAccountName = sAMAccountName;
 
@@ -332,7 +333,15 @@ namespace PKIKeyRecovery
                     {
                         Exists = true;
                         this.sAMAccountName = Result.SamAccountName;
-                        Email = Result.EmailAddress;
+                        try
+                        {
+                            Email = Result.EmailAddress;
+                            HasEmailAddress = true;
+                        }
+                        catch
+                        {
+                            //No Email
+                        }
                         PrincipalName = Result.UserPrincipalName;
                         DisplayName = Result.DisplayName;
 

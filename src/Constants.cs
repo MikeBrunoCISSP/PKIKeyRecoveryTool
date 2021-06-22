@@ -49,6 +49,7 @@ namespace PKIKeyRecovery
         internal const string InvalidEmail = @"Invalid Email";
         internal static readonly string ConfFile = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\KRTool\\KRTool.cfg";
         internal const string Unavailable = nameof(Unavailable);
+        internal const string UserNotFound = @"User not found";
     }
 
     internal static class Placeholders

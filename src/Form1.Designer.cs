@@ -123,13 +123,14 @@
             // txtUserName
             // 
             this.txtUserName.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtUserName.Location = new System.Drawing.Point(128, 35);
+            this.txtUserName.Location = new System.Drawing.Point(128, 45);
             this.txtUserName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtUserName.Name = "txtUserName";
             this.txtUserName.Size = new System.Drawing.Size(212, 32);
             this.txtUserName.TabIndex = 1;
             this.toolTip1.SetToolTip(this.txtUserName, "Enter the Active Directory SAMAccountName of the individual whose keys are to be " +
         "recovered");
+            this.txtUserName.TextChanged += new System.EventHandler(this.txtUserName_TextChanged);
             // 
             // btnValidate
             // 
@@ -138,11 +139,12 @@
             this.btnValidate.Location = new System.Drawing.Point(362, 45);
             this.btnValidate.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnValidate.Name = "btnValidate";
-            this.btnValidate.Size = new System.Drawing.Size(333, 37);
+            this.btnValidate.Size = new System.Drawing.Size(243, 37);
             this.btnValidate.TabIndex = 2;
             this.btnValidate.Text = "Confirm Username";
             this.toolTip1.SetToolTip(this.btnValidate, "Check whether the entered username exists in the Active Directory");
             this.btnValidate.UseVisualStyleBackColor = true;
+            this.btnValidate.Click += new System.EventHandler(this.btnValidate_Click);
             // 
             // btnRecoverKeys
             // 
@@ -161,7 +163,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(8, 42);
+            this.label1.Location = new System.Drawing.Point(8, 48);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(119, 26);
@@ -175,13 +177,14 @@
             this.panel1.Location = new System.Drawing.Point(362, 92);
             this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(333, 62);
+            this.panel1.Size = new System.Drawing.Size(476, 62);
             this.panel1.TabIndex = 3;
             // 
             // lblCN
             // 
             this.lblCN.AutoSize = true;
-            this.lblCN.Location = new System.Drawing.Point(9, 9);
+            this.lblCN.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCN.Location = new System.Drawing.Point(9, 15);
             this.lblCN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCN.Name = "lblCN";
             this.lblCN.Size = new System.Drawing.Size(0, 26);
@@ -203,7 +206,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(704, 297);
+            this.groupBox1.Size = new System.Drawing.Size(846, 297);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Key Recovery";

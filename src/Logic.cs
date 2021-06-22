@@ -17,20 +17,5 @@ namespace PKIKeyRecovery
 {
     public partial class Form1
     {
-        private static PrincipalContext AdContext = new PrincipalContext(ContextType.Domain);
-        private List<ADCertificationAuthority> CAs = new List<ADCertificationAuthority>();
-        private Configuration Config;
-
-        private void InitializeContext()
-        {
-            //Config = new Configuration();
-            RuntimeContext.Log = new MJBLog();
-            RuntimeContext.Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
-            RuntimeContext.Log.Banner();
-            RuntimeContext.Log.Verbose(@"Enumerating all Enterprise CAs existing in AD...");
-
-            cboCA.DataSource = RuntimeContext.CAs;
-            cboCA.DisplayMember = nameof(ADCertificationAuthority.Config);
-        }
     }
 }
