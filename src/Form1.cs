@@ -25,6 +25,8 @@ namespace PKIKeyRecovery
         public Form1()
         {
             InitializeComponent();
+            cboCA.DataSource = RuntimeContext.CAs;
+            cboCA.DisplayMember = nameof(ADCertificationAuthority.Name);
             System.Drawing.Icon icon = PKIKeyRecovery.Properties.Resources.pki;
             this.Icon = icon;
         }
@@ -330,6 +332,16 @@ namespace PKIKeyRecovery
 
 
             return true;
+        }
+
+        private void cboCA_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            cboTemplate.DataSource = (cboCA.SelectedValue as ADCertificationAuthority).Templates
+                .Where(p => p.RequiresPrivateKeyArchival)
+                .ToList();
+            cboTemplate.DisplayMember = nameof(ADCertificateTemplate.DisplayName);
+            cboTemplate.Update();
+            cboTemplate.SelectedIndex = -1;
         }
 
         //private bool SendEmail(User user, bool eDiscovery)
