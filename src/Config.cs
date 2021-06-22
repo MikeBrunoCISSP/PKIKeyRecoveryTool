@@ -105,6 +105,7 @@ namespace PKIKeyRecovery
                 txtDestDir.Text = path;
                 destDirSet = true;
             }
+            btnApply.Enabled = ConfigSet;
         }
 
         private void rbtnEmailYes_CheckedChanged(object sender, EventArgs e)

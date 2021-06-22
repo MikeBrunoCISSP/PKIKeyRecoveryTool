@@ -76,6 +76,12 @@ namespace PKIKeyRecovery
 
             var unprettyJson = JsonConvert.SerializeObject(this);
             var formattedJson = JToken.Parse(unprettyJson).ToString(Formatting.Indented);
+
+            string folderPath = Path.GetDirectoryName(Constants.ConfFile);
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
             File.WriteAllText(Constants.ConfFile, formattedJson);
         }
     }
