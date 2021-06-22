@@ -16,6 +16,9 @@ namespace PKIKeyRecovery
         private static List<string> domains;
         private static bool domainsSet = false;
 
+        private ADCertificationAuthority SelectedCA = null;
+        private ADCertificateTemplate SelectedTemplate = null;
+
         internal static List<string> Domains
         {
             get
@@ -48,7 +51,6 @@ namespace PKIKeyRecovery
         public bool AnyKeysRecovered => recoveredKeys > 0;
         public bool HasArchivedCerts => certs.Count > 0;
 
-        Configuration conf;
 
         public string MergedPFX,
                       KeyDirectory,
@@ -68,13 +70,16 @@ namespace PKIKeyRecovery
 
         int recoveredKeys;
 
-        public User(string username, ADCertificationAuthority CA)
+        public User(string username, ADCertificationAuthority CA, ADCertificateTemplate Template)
         {
             if (string.IsNullOrEmpty(username))
             {
                 valid = false;
                 return;
             }
+
+            SelectedCA = CA;
+            SelectedTemplate = Template;
 
             keyFiles = new List<string>();
 
@@ -97,11 +102,11 @@ namespace PKIKeyRecovery
                 RuntimeContext.Log.Verbose($"SAMAccountName: {sAMAccountName}");
                 RuntimeContext.Log.Verbose($"User Principal Name: {(Exists? PrincipalName : Constants.Unavailable)}");
                 RuntimeContext.Log.Verbose($"Display Name: {(Exists ? DisplayName : Constants.Unavailable)}");
-                RuntimeContext.Log.Verbose($"Email Address: {(Exists ? Email : Constants.Unavailable) }");
+                RuntimeContext.Log.Verbose($"Email Address: {(Exists && HasEmailAddress ? Email : Constants.Unavailable) }");
                 RuntimeContext.Log.Verbose($"BLOB Directory: {BLOBDirectory}");
                 RuntimeContext.Log.Verbose($"Key Directory: {KeyDirectory}");
             }
-            count = GetCertificates(CA);
+            count = GetCertificates();
             switch (count)
             {
                 case -1:
@@ -122,7 +127,7 @@ namespace PKIKeyRecovery
             }
         }
 
-        private int GetCertificates(ADCertificationAuthority CA)
+        private int GetCertificates()
         {
             Certificate crt;
             string command,
@@ -133,13 +138,13 @@ namespace PKIKeyRecovery
             int index;
 
             RuntimeContext.Log.Info("Serial Numbers of Certificates for which to recover keys:");
-            foreach (ADCertificateTemplate Template in CA.Templates.Where(p => p.RequiresPrivateKeyArchival))
+            foreach (ADCertificateTemplate Template in SelectedCA.Templates.Where(p => p.RequiresPrivateKeyArchival))
             {
                 index = 1;
-                templateName = Template.DisplayName;
-                templateOID = Template.Oid;
+                templateName = SelectedTemplate.DisplayName;
+                templateOID = SelectedTemplate.Oid;
 
-                command = $"certutil -config {CA.Config} -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
+                command = $"certutil -config {SelectedCA.Config} -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
                 var Output = Shell.Exec(command);
                 foreach (string record in Output)
                 {
@@ -153,7 +158,7 @@ namespace PKIKeyRecovery
                                 RuntimeContext.Log.Info($"Current serial number: {currentSN}");
                                 crt = new Certificate(currentSN,
                                                       templateName,
-                                                      CA.Config,
+                                                      SelectedCA.Config,
                                                       sAMAccountName,
                                                       BLOBDirectory,
                                                       KeyDirectory,

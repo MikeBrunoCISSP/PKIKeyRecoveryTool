@@ -158,6 +158,7 @@
             this.btnRecoverKeys.Text = "Individual Recovery";
             this.toolTip1.SetToolTip(this.btnRecoverKeys, "Recover keys for an individual");
             this.btnRecoverKeys.UseVisualStyleBackColor = true;
+            this.btnRecoverKeys.Click += new System.EventHandler(this.btnRecoverKeys_Click);
             // 
             // label1
             // 
@@ -259,6 +260,7 @@
             this.cboTemplate.Name = "cboTemplate";
             this.cboTemplate.Size = new System.Drawing.Size(758, 34);
             this.cboTemplate.TabIndex = 14;
+            this.cboTemplate.SelectedIndexChanged += new System.EventHandler(this.cboTemplate_SelectedIndexChanged);
             // 
             // Form1
             // 

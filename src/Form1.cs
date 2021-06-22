@@ -48,7 +48,7 @@ namespace PKIKeyRecovery
 
         private bool RecoverKeysForUser(string username, string password)
         {
-            User user = new User(username, (ADCertificationAuthority)cboCA.SelectedItem);
+            User user = new User(username, (ADCertificationAuthority)cboCA.SelectedItem, (ADCertificateTemplate)cboTemplate.SelectedItem);
 
             if (user.valid)
             {
@@ -85,7 +85,7 @@ namespace PKIKeyRecovery
             foreach (string username in usernames)
             {
                 RuntimeContext.Log.Info("Processing user \"" + username + "\"");
-                currentUser = new User(username, (ADCertificationAuthority)cboCA.SelectedItem);
+                currentUser = new User(username, (ADCertificationAuthority)cboCA.SelectedItem, (ADCertificateTemplate)cboTemplate.SelectedItem);
                 if (!currentUser.Exists)
                 {
                     RuntimeContext.Log.Warning($"User \"{username}\" was not found in the Active Directory");
@@ -356,12 +356,16 @@ namespace PKIKeyRecovery
 
         private void btnValidate_Click(object sender, EventArgs e)
         {
-            SelectedUser = new User(txtUserName.Text, cboCA.SelectedValue as ADCertificationAuthority);
+            SelectedUser = new User(txtUserName.Text, cboCA.SelectedValue as ADCertificationAuthority, cboTemplate.SelectedItem as ADCertificateTemplate);
             if (SelectedUser.Exists)
             {
                 panel1.BackColor = Color.LightGreen;
                 lblCN.Text = SelectedUser.DisplayName;
-                btnRecoverKeys.Enabled = true;
+
+                if (cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1)
+                {
+                    btnRecoverKeys.Enabled = true;
+                }
             }
             else
             {
@@ -369,6 +373,19 @@ namespace PKIKeyRecovery
                 lblCN.Text = Constants.UserNotFound;
                 btnRecoverKeys.Enabled = false;
             }
+        }
+
+        private void cboTemplate_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (SelectedUser != null && SelectedUser.Exists)
+            {
+                btnRecoverKeys.Enabled = true;
+            }
+        }
+
+        private void btnRecoverKeys_Click(object sender, EventArgs e)
+        {
+
         }
 
         //private bool SendEmail(User user, bool eDiscovery)
