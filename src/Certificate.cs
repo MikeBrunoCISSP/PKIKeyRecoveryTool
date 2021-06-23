@@ -56,15 +56,6 @@ namespace PKIKeyRecovery
                 else
                 {
                     RuntimeContext.Log.Error($"Key could not be recovered for {Template} certificate {SerialNumber}");
-                    if (RuntimeContext.Log.Level.GE(LogLevel.Error))
-                    {
-                        RuntimeContext.Log.Echo("Result of command:");
-                        try
-                        {
-                            output.ForEach(p => RuntimeContext.Log.Echo(p.Replace(password, @"[password]")));
-                        }
-                        catch (Exception) { }
-                    }
                 }
             }
             return recovered;
