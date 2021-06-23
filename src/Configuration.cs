@@ -68,7 +68,7 @@ namespace PKIKeyRecovery
                                DiscoveryEmail.IsValidEmail() &&
                                SenderEmail.IsValidEmail()));
 
-        internal string WorkingDirectory => Path.Combine(Environment.CurrentDirectory, @"\working");
+        internal string WorkingDirectory => $".\\working_{DateTime.Now:yyyy-MM-dd_hhmmss}";
 
         public void Commit()
         {

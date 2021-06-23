@@ -513,46 +513,45 @@ namespace PKIKeyRecovery
 
         private bool DeliverKeys(User user, string password, bool eDiscovery)
         {
-            var DialogMessage = new StringBuilder(string.Empty);
-            bool success,
-                 dialogNeeded,
-                 displayPasswordOnScreen,
-                 attachToEmail;
+            string topMessage = $"{(user.fullSuccess ? @"All" : @"Some")} key(s) recovery for {user.DisplayName} ({user.sAMAccountName}) succeeded.";
+            var bottomMessage = new StringBuilder(string.Empty);
 
+            bool success;
 
-            dialogNeeded = false;
-
+            success = user.fullSuccess;
+            
             if (user.AnyKeysRecovered)
             {
 
-                if (user.fullSuccess)
-                    success = true;
-                else
-                    success = false;
-
                 if (!user.KeysMerged)
                 {
-                    DialogMessage.AppendLine($"A single, merged PFX file was unable to be created.  The individual PFX files can be found here: \"{user.KeyDirectory}\"\r\n");
+                    bottomMessage.AppendLine($"A merged PFX file could not be created.\r\nThe individual PFX files can be found here:\r\n{user.KeyDirectory}");
                     success = false;
-                    dialogNeeded = true;
+                }
+                else
+                {
+                    bottomMessage.AppendLine($"A merged PFX file was created:\r\n{user.MergedPFX}");
                 }
 
                 if (RuntimeContext.Conf.AttachToEmail)
                 {
-                    dialogNeeded = true;
-                    DialogMessage.AppendLine($"Password: {password}\r\n\r\nPlease provide this password using an out-of-band method (e.g. on the phone or in-person)");
+                    bottomMessage.AppendLine($"\r\nPlease provide the PFX password using an out-of-band method (e.g. on the phone or in-person)");
                 }
 
                 //Send Email message (if applicable)
                 if (RuntimeContext.Conf.UseEmail)
                 {
-                    SendEmail(user, password, eDiscovery);
+                    if (!SendEmail(user, password, eDiscovery))
+                    {
+                        bottomMessage.AppendLine($"\r\nAn Email was not able to be sent to {(eDiscovery ? @"eDiscovery" : @"the user")}");
+                        success = false;
+                    }
                 }
 
                 //Show Dialog
-                if (dialogNeeded)
+                using (var Dialog = new RecoveredDialog(success, topMessage, bottomMessage.ToString(), password))
                 {
-                    MessageBox.Show(DialogMessage.ToString(), "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Dialog.ShowDialog();
                 }
 
                 if (user.KeysMerged)
@@ -567,12 +566,18 @@ namespace PKIKeyRecovery
             {
                 if (user.fullSuccess)
                 {
-                    MessageBox.Show("No keys were found for user \"" + txtUserName.Text + "\"", "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    using (var Dialog = new RecoveredDialog(true, $"No encryption keys to recover for {user.DisplayName} ({user.sAMAccountName})", @"No archived encryption keys were found for this user in the specified CA database"))
+                    {
+                        Dialog.ShowDialog();
+                    }
                     return true;
                 }
                 else
                 {
-                    MessageBox.Show("No keys could be recovered for user \"" + txtUserName.Text + "\"", "KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    using (var Dialog = new RecoveredDialog(false, $"No encryption keys could be recovered for {user.DisplayName} ({user.sAMAccountName})", @"Archived encryption keys were found for this user in the specified CA database, but all key recovery attempts failed."))
+                    {
+                        Dialog.ShowDialog();
+                    }
                     return false;
                 }
             }

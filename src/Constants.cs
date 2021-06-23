@@ -44,6 +44,12 @@ namespace PKIKeyRecovery
         internal const int MaxPasswordLength = 20;
     }
 
+    internal static class ImageFile
+    {
+        internal const string Success = @"Success.png";
+        internal const string Error = @"Error.png";
+    }
+
     internal static class Constants
     {
         internal const string InvalidEmail = @"Invalid Email";

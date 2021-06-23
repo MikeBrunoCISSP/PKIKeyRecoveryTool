@@ -34,7 +34,7 @@ namespace PKIKeyRecovery
                     charSet += Conf.UseSymbols ? CharacterSet.Symbol : string.Empty;
                     gotCharSet = true;
                 }
-                return CharSet;
+                return charSet;
             }
         }
 
