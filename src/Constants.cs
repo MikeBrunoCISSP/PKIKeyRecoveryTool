@@ -52,6 +52,13 @@ namespace PKIKeyRecovery
         internal const string UserNotFound = @"User not found";
     }
 
+    internal static class CharacterSet
+    {
+        internal const string Alpha = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        internal const string Digit = @"0123456789";
+        internal const string Symbol = @"!@#$%^&*()_=+-";
+    }
+
     internal static class Placeholders
     {
         internal const string Password = "[PASSWORD]";

@@ -42,13 +42,14 @@ namespace PKIKeyRecovery
             else
             {
                 btnValidate.Enabled = true;
-                btnRecoverKeys.Enabled = rbtnUser.Checked || rbtnEDiscovery.Checked || rbtnMobile.Checked;
+                btnRecoverKeys.Enabled = rbtnUser.Checked || rbtnEDiscovery.Checked;
             }
         }
 
-        private bool RecoverKeysForUser(string username, string password)
+        private bool RecoverKeysForUser(string username)
         {
             User user = new User(username, (ADCertificationAuthority)cboCA.SelectedItem, (ADCertificateTemplate)cboTemplate.SelectedItem);
+            string password = RandomString();
 
             if (user.valid)
             {
@@ -362,7 +363,7 @@ namespace PKIKeyRecovery
                 panel1.BackColor = Color.LightGreen;
                 lblCN.Text = SelectedUser.DisplayName;
 
-                if (cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1)
+                if ((cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1) && (rbtnUser.Checked ^ rbtnEDiscovery.Checked))
                 {
                     btnRecoverKeys.Enabled = true;
                 }
@@ -385,8 +386,9 @@ namespace PKIKeyRecovery
 
         private void btnRecoverKeys_Click(object sender, EventArgs e)
         {
-
+            RecoverKeysForUser(SelectedUser.sAMAccountName);
         }
+
 
         //private bool SendEmail(User user, bool eDiscovery)
         //{

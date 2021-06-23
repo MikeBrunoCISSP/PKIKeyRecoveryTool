@@ -29,6 +29,9 @@ namespace PKIKeyRecovery
         internal bool DiscDirectorySet => !string.IsNullOrEmpty(DiscoveryDirectory) && Directory.Exists(DiscoveryDirectory);
 
         public int PasswordLength { get; set; } = 16;
+        public bool UseAlphas { get; set; } = true;
+        public bool UseDigits { get; set; } = true;
+        public bool UseSymbols { get; set; } = true;
         public bool UseEmail { get; set; } = false;
         public string SmtpServer { get; set; } = string.Empty;
 

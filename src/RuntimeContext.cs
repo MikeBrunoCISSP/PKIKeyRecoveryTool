@@ -21,6 +21,23 @@ namespace PKIKeyRecovery
         internal static MJBLog Log;
         internal static List<ADCertificationAuthority> CAs;
 
+        private static string charSet = string.Empty;
+        private static bool gotCharSet = false;
+        internal static string CharSet
+        {
+            get
+            {
+                if (!gotCharSet)
+                {
+                    charSet = Conf.UseAlphas ? CharacterSet.Alpha : string.Empty;
+                    charSet += Conf.UseDigits ? CharacterSet.Digit : string.Empty;
+                    charSet += Conf.UseSymbols ? CharacterSet.Symbol : string.Empty;
+                    gotCharSet = true;
+                }
+                return CharSet;
+            }
+        }
+
         internal static void Init()
         {
             bool gotConf = false;

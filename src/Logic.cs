@@ -17,5 +17,12 @@ namespace PKIKeyRecovery
 {
     public partial class Form1
     {
+        internal static Random random = new Random();
+
+        internal string RandomString()
+        {
+            return new string(Enumerable.Repeat(RuntimeContext.CharSet, RuntimeContext.Conf.PasswordLength)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
 }
