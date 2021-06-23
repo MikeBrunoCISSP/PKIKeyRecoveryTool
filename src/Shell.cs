@@ -17,83 +17,20 @@ namespace PKIKeyRecovery
         const int ERROR = 1;
         const int CRITICAL = 0;
 
-        public static string[] Exec(string command)
-        {
-            string output = ExecuteCommand(command);
 
-            if (output != null)
-                return output.Split('\n');
-            else
-                return null;
+        public static string[] Exec(string command, string sanitizedCommand = null)
+        {
+            string sCommand = string.IsNullOrEmpty(sanitizedCommand)
+                ? command
+                : sanitizedCommand;
+
+            return ExecuteCommand(command, sCommand);
         }
 
-        public static string[] Exec(string command, string sanitizedCommand)
+        private static string[] ExecuteCommand(string command, string sanitizedCommand = null)
         {
-            RuntimeContext.Log.Verbose($"Command: \"{sanitizedCommand}\"");
-            string output = ExecuteCommand(command);
+            RuntimeContext.Log.Verbose($"Command: \"{(string.IsNullOrEmpty(sanitizedCommand) ? command : sanitizedCommand)}\"");
 
-            if (output != null)
-            {
-                string[] lines = output.Split('\n');
-                if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
-                {
-                    RuntimeContext.Log.Verbose("Command Result:");
-                    lines.ForEach(line => RuntimeContext.Log.Echo(line));
-                }
-                return lines;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static bool executeAndVerify(string command, string successIndicator)
-        {
-            string output = ExecuteCommand(command);
-            return stdlib.InString(output, successIndicator);
-        }
-
-        public static bool executeAndVerify(string command, string successIndicator, int requiredInstancesOfSuccessIndicator)
-        {
-            string output = ExecuteCommand(command);
-            return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
-        }
-
-        public static string ExecuteAndLog(string command, string sanitizedCommand)
-        {
-            RuntimeContext.Log.Verbose($"Command : {sanitizedCommand}");
-            string output = ExecuteCommand(command);
-
-            if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
-            {
-                RuntimeContext.Log.Verbose("Command Result:");
-
-                Regex.Split(output, "\r\n")
-                     .ForEach(line => RuntimeContext.Log.Echo(line));
-            }
-
-            return output;
-        }
-
-        public static bool executeAndVerify(string command, string sanitizedCommand, string successIndicator, int requiredInstancesOfSuccessIndicator)
-        {
-            RuntimeContext.Log.Verbose($"Command : {sanitizedCommand}");
-            string output = ExecuteCommand(command);
-
-            if (RuntimeContext.Log.Level.GE(LogLevel.Verbose))
-            {
-                RuntimeContext.Log.Verbose("Command Result:");
-
-                Regex.Split(output, "\r\n")
-                     .ForEach(line => RuntimeContext.Log.Echo(line));
-            }
-
-            return (stdlib.instancesOfSubString(output, successIndicator) == requiredInstancesOfSuccessIndicator);
-        }
-
-        private static string ExecuteCommand(string command)
-        {
             try
             {
                 ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command);
@@ -107,11 +44,19 @@ namespace PKIKeyRecovery
 
                 string output = proc.StandardOutput.ReadToEnd();
                 proc.WaitForExit();
-                return (output);
+
+                string[] result = Regex.Split(output, "\r\n");
+                if (RuntimeContext.Log.Level.GE(LogLevel.Verbose) && !string.IsNullOrEmpty(output))
+                {
+                    RuntimeContext.Log.Verbose(@"Command Result: ");
+                    result.ForEach(p => RuntimeContext.Log.Echo(p, level: LogLevel.Verbose));
+                }
+                return result;
             }
 
-            catch (Exception)
+            catch (Exception ex)
             {
+                RuntimeContext.Log.Exception(ex);
                 return null;
             }
         }

@@ -144,7 +144,7 @@ namespace PKIKeyRecovery
                 templateName = SelectedTemplate.DisplayName;
                 templateOID = SelectedTemplate.Oid;
 
-                command = $"certutil -config {SelectedCA.Config} -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
+                command = $"certutil -config \"{SelectedCA.Config}\" -view -restrict \"UPN={PrincipalName},CertificateTemplate={templateOID}\" -out SerialNumber";
                 var Output = Shell.Exec(command);
                 foreach (string record in Output)
                 {
@@ -267,7 +267,7 @@ namespace PKIKeyRecovery
                     RuntimeContext.Log.Info($"Attempting to merge PFX files for user \"{sAMAccountName}\"");
                     command = $"certutil -p \"{password},{password}\" -mergepfx -user \"{string.Join(@",", KeyList)}\" \"{MergedPFX}\"";
                     sanitizedCommand = command.Replace(password, "[password]");
-                    Shell.ExecuteAndLog(command, sanitizedCommand);
+                    Shell.Exec(command, sanitizedCommand);
                     HasMergedPfx = true;
                     break;
             }

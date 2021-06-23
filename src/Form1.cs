@@ -220,7 +220,7 @@ namespace PKIKeyRecovery
             RuntimeContext.Log.Info("Attempting to merge all PFX files in the working directory");
             command = $"certutil -p \"{password},{password}\" -mergepfx -user {keyList} \"{mergedPFX}\"";
             sanitizedCommand = command.Replace(password, "[password]");
-            Shell.ExecuteAndLog(command, sanitizedCommand);
+            Shell.Exec(command, sanitizedCommand);
 
             if (File.Exists(mergedPFX))
             {
