@@ -344,6 +344,8 @@ namespace PKIKeyRecovery
             cboTemplate.DisplayMember = nameof(ADCertificateTemplate.DisplayName);
             cboTemplate.Update();
             cboTemplate.SelectedIndex = -1;
+
+            btnRecoverKeys.Enabled = false;
         }
 
         private void txtUserName_TextChanged(object sender, EventArgs e)
@@ -363,10 +365,7 @@ namespace PKIKeyRecovery
                 panel1.BackColor = Color.LightGreen;
                 lblCN.Text = SelectedUser.DisplayName;
 
-                if ((cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1) && (rbtnUser.Checked ^ rbtnEDiscovery.Checked))
-                {
-                    btnRecoverKeys.Enabled = true;
-                }
+                CheckFields();
             }
             else
             {
@@ -378,15 +377,17 @@ namespace PKIKeyRecovery
 
         private void cboTemplate_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (SelectedUser != null && SelectedUser.Exists)
-            {
-                btnRecoverKeys.Enabled = true;
-            }
+            CheckFields();
         }
 
         private void btnRecoverKeys_Click(object sender, EventArgs e)
         {
             RecoverKeysForUser(SelectedUser.sAMAccountName);
+        }
+
+        private void CheckFields()
+        {
+            btnRecoverKeys.Enabled = (cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1) && (rbtnUser.Checked ^ rbtnEDiscovery.Checked) && SelectedUser != null;
         }
 
 
@@ -530,7 +531,7 @@ namespace PKIKeyRecovery
                 }
                 else
                 {
-                    bottomMessage.AppendLine($"A merged PFX file was created:\r\n{user.MergedPFX}");
+                    bottomMessage.AppendLine($"A merged PFX file was created:\r\n{user.KeyRetrievalLocation}");
                 }
 
                 if (RuntimeContext.Conf.AttachToEmail)
