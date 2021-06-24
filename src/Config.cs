@@ -10,7 +10,6 @@ namespace PKIKeyRecovery
         internal Configuration Conf = null;
 
         private bool destDirSet = false;
-        private bool discDirSet = false;
         private bool useEmail = false;
         private bool smtpServerSet = false;
         private bool smtpPortSet = true;
@@ -19,7 +18,7 @@ namespace PKIKeyRecovery
         private bool discoveryEmailSet = false;
         private bool senderEmailSet = false;
 
-        private bool ConfigSet => destDirSet && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
+        private bool ConfigSet => destDirSet && (chkAlpha.Checked || chkDigits.Checked || chkSymbols.Checked) && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
 
         public Config()
         {
@@ -28,57 +27,64 @@ namespace PKIKeyRecovery
             {
                 var conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
 
-                if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+                if (conf.Version == Constants.ConfigurationVersion)
                 {
-                    txtDestDir.Enabled = true;
-                    txtDestDir.Text = conf.DestinationDirectory;
-                    txtDestDir.Enabled = false;
-                    destDirSet = true;
-                }
 
-                if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
-                {
-                    txtDiscDir.Enabled = true;
-                    txtDiscDir.Text = conf.DestinationDirectory;
-                    txtDiscDir.Enabled = false;
-                    discDirSet = true;
-                }
+                    if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+                    {
+                        txtDestDir.Enabled = true;
+                        txtDestDir.Text = conf.DestinationDirectory;
+                        txtDestDir.Enabled = false;
+                        destDirSet = true;
+                    }
 
-                trkPwdLength.Value = conf.PasswordLength;
-                rbtnEmailYes.Checked = conf.UseEmail;
+                    if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
+                    {
+                        txtDiscDir.Enabled = true;
+                        txtDiscDir.Text = conf.DestinationDirectory;
+                        txtDiscDir.Enabled = false;
+                    }
 
-                txtSmtpServer.Text = conf.SmtpServer;
-                smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+                    trkPwdLength.Value = conf.PasswordLength;
+                    rbtnEmailYes.Checked = conf.UseEmail;
 
-                txtSmtpUser.Text = conf.SmtpUsername;
-                txtSmtpPassword.Text = conf.SmtpPassword;
+                    txtSmtpServer.Text = conf.SmtpServer;
+                    smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
 
-                txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
-                smtpPortSet = true;
+                    txtSmtpUser.Text = conf.SmtpUsername;
+                    txtSmtpPassword.Text = conf.SmtpPassword;
 
-                rbtnAttachYes.Checked = conf.AttachToEmail;
-                rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
+                    txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
+                    smtpPortSet = true;
 
-                txtDiscEmail.Text = conf.DiscoveryEmail;
-                if (txtDiscEmail.Text.IsValidEmail())
-                {
-                    discoveryEmailSet = true;
+                    rbtnAttachYes.Checked = conf.AttachToEmail;
+                    rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
+
+                    txtDiscEmail.Text = conf.DiscoveryEmail;
+                    if (txtDiscEmail.Text.IsValidEmail())
+                    {
+                        discoveryEmailSet = true;
+                    }
+                    else
+                    {
+                        lblInvalidDiscovery.Text = Constants.InvalidEmail;
+                    }
+
+                    txtSenderEmail.Text = conf.SenderEmail;
+                    if (txtSenderEmail.Text.IsValidEmail())
+                    {
+                        senderEmailSet = true;
+                    }
+                    else
+                    {
+                        lblInvalidSender.Text = Constants.InvalidEmail;
+                    }
+
                 }
                 else
                 {
-                    lblInvalidDiscovery.Text = Constants.InvalidEmail;
+                    RuntimeContext.Log.Warning($"A configuration file was found, but it contains a version {conf.Version} configuration. This distribution of KRTool requires configuration version {Constants.ConfigurationVersion}. Could not pre-populate configuration GUI");
                 }
-
-                txtSenderEmail.Text = conf.SenderEmail;
-                if (txtSenderEmail.Text.IsValidEmail())
-                {
-                    senderEmailSet = true;
-                }
-                else
-                {
-                    lblInvalidSender.Text = Constants.InvalidEmail;
-                }
-
                 btnApply.Enabled = false;
             }
 
@@ -129,6 +135,8 @@ namespace PKIKeyRecovery
             rbtnAttachNo.Enabled = rbtnEmailYes.Checked;
             txtDiscEmail.Enabled = rbtnEmailYes.Checked;
             txtSenderEmail.Enabled = rbtnEmailYes.Checked;
+            rbtnDeleteYes.Enabled = rbtnEmailYes.Checked;
+            rbtnDeleteNo.Enabled = rbtnEmailYes.Checked;
 
             btnApply.Enabled = ConfigSet;
         }
@@ -198,7 +206,10 @@ namespace PKIKeyRecovery
             Conf = new Configuration()
             {
                 DestinationDirectory = txtDestDir.Text,
-                PasswordLength = trkPwdLength.Value
+                PasswordLength = trkPwdLength.Value,
+                UseAlphas = chkAlpha.Checked,
+                UseDigits = chkDigits.Checked,
+                UseSymbols = chkSymbols.Checked
             };
 
             if (rbtnEmailYes.Checked)
@@ -235,7 +246,6 @@ namespace PKIKeyRecovery
             if (ChooseFolder(out string path))
             {
                 txtDiscDir.Text = path;
-                discDirSet = true;
             }
         }
 
@@ -260,6 +270,21 @@ namespace PKIKeyRecovery
         private void txtSmtpUser_TextChanged(object sender, EventArgs e)
         {
             smtpUsernameSet = !string.IsNullOrEmpty(txtSmtpUser.Text);
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkAlpha_CheckedChanged(object sender, EventArgs e)
+        {
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkDigits_CheckedChanged(object sender, EventArgs e)
+        {
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkSymbols_CheckedChanged(object sender, EventArgs e)
+        {
             btnApply.Enabled = ConfigSet;
         }
     }

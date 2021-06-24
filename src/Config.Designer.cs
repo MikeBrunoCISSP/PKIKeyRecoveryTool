@@ -44,6 +44,8 @@ namespace PKIKeyRecovery
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.txtSmtpUser = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
             this.rbtnDeleteNo = new System.Windows.Forms.RadioButton();
             this.rbtnDeleteYes = new System.Windows.Forms.RadioButton();
@@ -67,8 +69,9 @@ namespace PKIKeyRecovery
             this.btnDiscBrowse = new System.Windows.Forms.Button();
             this.txtDiscDir = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.txtSmtpUser = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
+            this.chkAlpha = new System.Windows.Forms.CheckBox();
+            this.chkDigits = new System.Windows.Forms.CheckBox();
+            this.chkSymbols = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.trkPwdLength)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -91,7 +94,7 @@ namespace PKIKeyRecovery
             this.txtDestDir.Enabled = false;
             this.txtDestDir.Location = new System.Drawing.Point(250, 12);
             this.txtDestDir.Name = "txtDestDir";
-            this.txtDestDir.Size = new System.Drawing.Size(537, 32);
+            this.txtDestDir.Size = new System.Drawing.Size(537, 24);
             this.txtDestDir.TabIndex = 1;
             this.txtDestDir.TextChanged += new System.EventHandler(this.txtDestDir_TextChanged);
             // 
@@ -120,7 +123,7 @@ namespace PKIKeyRecovery
             this.trkPwdLength.Maximum = 32;
             this.trkPwdLength.Minimum = 8;
             this.trkPwdLength.Name = "trkPwdLength";
-            this.trkPwdLength.Size = new System.Drawing.Size(537, 69);
+            this.trkPwdLength.Size = new System.Drawing.Size(537, 45);
             this.trkPwdLength.TabIndex = 99;
             this.trkPwdLength.Value = 8;
             this.trkPwdLength.Scroll += new System.EventHandler(this.trkPwdLength_Scroll);
@@ -131,12 +134,12 @@ namespace PKIKeyRecovery
             this.lblPwdLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPwdLength.Location = new System.Drawing.Point(824, 60);
             this.lblPwdLength.Name = "lblPwdLength";
-            this.lblPwdLength.Size = new System.Drawing.Size(0, 32);
+            this.lblPwdLength.Size = new System.Drawing.Size(0, 24);
             this.lblPwdLength.TabIndex = 5;
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(13, 140);
+            this.label3.Location = new System.Drawing.Point(6, 37);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(220, 26);
             this.label3.TabIndex = 6;
@@ -145,7 +148,7 @@ namespace PKIKeyRecovery
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(10, 145);
+            this.label4.Location = new System.Drawing.Point(10, 120);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(220, 26);
             this.label4.TabIndex = 9;
@@ -154,7 +157,7 @@ namespace PKIKeyRecovery
             // 
             // label5
             // 
-            this.label5.Location = new System.Drawing.Point(10, 295);
+            this.label5.Location = new System.Drawing.Point(10, 270);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(220, 26);
             this.label5.TabIndex = 10;
@@ -164,9 +167,9 @@ namespace PKIKeyRecovery
             // txtSmtpPort
             // 
             this.txtSmtpPort.Enabled = false;
-            this.txtSmtpPort.Location = new System.Drawing.Point(239, 295);
+            this.txtSmtpPort.Location = new System.Drawing.Point(239, 270);
             this.txtSmtpPort.Name = "txtSmtpPort";
-            this.txtSmtpPort.Size = new System.Drawing.Size(100, 32);
+            this.txtSmtpPort.Size = new System.Drawing.Size(100, 24);
             this.txtSmtpPort.TabIndex = 5;
             this.txtSmtpPort.Text = "25";
             this.txtSmtpPort.TextChanged += new System.EventHandler(this.txtSmtpPort_TextChanged);
@@ -175,25 +178,25 @@ namespace PKIKeyRecovery
             // txtSmtpServer
             // 
             this.txtSmtpServer.Enabled = false;
-            this.txtSmtpServer.Location = new System.Drawing.Point(240, 145);
+            this.txtSmtpServer.Location = new System.Drawing.Point(240, 120);
             this.txtSmtpServer.Name = "txtSmtpServer";
-            this.txtSmtpServer.Size = new System.Drawing.Size(396, 32);
+            this.txtSmtpServer.Size = new System.Drawing.Size(396, 24);
             this.txtSmtpServer.TabIndex = 3;
             this.txtSmtpServer.TextChanged += new System.EventHandler(this.txtSmtpServer_TextChanged);
             // 
             // txtSmtpPassword
             // 
             this.txtSmtpPassword.Enabled = false;
-            this.txtSmtpPassword.Location = new System.Drawing.Point(239, 245);
+            this.txtSmtpPassword.Location = new System.Drawing.Point(239, 220);
             this.txtSmtpPassword.Name = "txtSmtpPassword";
             this.txtSmtpPassword.PasswordChar = '*';
-            this.txtSmtpPassword.Size = new System.Drawing.Size(396, 32);
+            this.txtSmtpPassword.Size = new System.Drawing.Size(396, 24);
             this.txtSmtpPassword.TabIndex = 4;
             this.txtSmtpPassword.TextChanged += new System.EventHandler(this.txtSmtpPassword_TextChanged);
             // 
             // label6
             // 
-            this.label6.Location = new System.Drawing.Point(10, 245);
+            this.label6.Location = new System.Drawing.Point(10, 220);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(220, 26);
             this.label6.TabIndex = 13;
@@ -202,7 +205,7 @@ namespace PKIKeyRecovery
             // 
             // label7
             // 
-            this.label7.Location = new System.Drawing.Point(10, 345);
+            this.label7.Location = new System.Drawing.Point(10, 320);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(220, 26);
             this.label7.TabIndex = 15;
@@ -214,6 +217,7 @@ namespace PKIKeyRecovery
             this.groupBox1.Controls.Add(this.txtSmtpUser);
             this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Controls.Add(this.panel3);
+            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label11);
             this.groupBox1.Controls.Add(this.panel2);
             this.groupBox1.Controls.Add(this.panel1);
@@ -228,18 +232,36 @@ namespace PKIKeyRecovery
             this.groupBox1.Controls.Add(this.txtSmtpPort);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Location = new System.Drawing.Point(10, 110);
+            this.groupBox1.Location = new System.Drawing.Point(10, 140);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(922, 461);
+            this.groupBox1.Size = new System.Drawing.Size(922, 418);
             this.groupBox1.TabIndex = 18;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Email";
+            // 
+            // txtSmtpUser
+            // 
+            this.txtSmtpUser.Enabled = false;
+            this.txtSmtpUser.Location = new System.Drawing.Point(240, 170);
+            this.txtSmtpUser.Name = "txtSmtpUser";
+            this.txtSmtpUser.Size = new System.Drawing.Size(396, 24);
+            this.txtSmtpUser.TabIndex = 103;
+            this.txtSmtpUser.TextChanged += new System.EventHandler(this.txtSmtpUser_TextChanged);
+            // 
+            // label12
+            // 
+            this.label12.Location = new System.Drawing.Point(10, 170);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(220, 26);
+            this.label12.TabIndex = 104;
+            this.label12.Text = "SMTP Username:";
+            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // panel3
             // 
             this.panel3.Controls.Add(this.rbtnDeleteNo);
             this.panel3.Controls.Add(this.rbtnDeleteYes);
-            this.panel3.Location = new System.Drawing.Point(240, 395);
+            this.panel3.Location = new System.Drawing.Point(240, 360);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(197, 40);
             this.panel3.TabIndex = 102;
@@ -250,7 +272,7 @@ namespace PKIKeyRecovery
             this.rbtnDeleteNo.Checked = true;
             this.rbtnDeleteNo.Location = new System.Drawing.Point(109, 3);
             this.rbtnDeleteNo.Name = "rbtnDeleteNo";
-            this.rbtnDeleteNo.Size = new System.Drawing.Size(65, 30);
+            this.rbtnDeleteNo.Size = new System.Drawing.Size(46, 22);
             this.rbtnDeleteNo.TabIndex = 20;
             this.rbtnDeleteNo.TabStop = true;
             this.rbtnDeleteNo.Text = "No";
@@ -261,14 +283,14 @@ namespace PKIKeyRecovery
             this.rbtnDeleteYes.AutoSize = true;
             this.rbtnDeleteYes.Location = new System.Drawing.Point(10, 3);
             this.rbtnDeleteYes.Name = "rbtnDeleteYes";
-            this.rbtnDeleteYes.Size = new System.Drawing.Size(76, 30);
+            this.rbtnDeleteYes.Size = new System.Drawing.Size(51, 22);
             this.rbtnDeleteYes.TabIndex = 19;
             this.rbtnDeleteYes.Text = "Yes";
             this.rbtnDeleteYes.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
-            this.label11.Location = new System.Drawing.Point(-11, 395);
+            this.label11.Location = new System.Drawing.Point(-11, 360);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(241, 26);
             this.label11.TabIndex = 101;
@@ -279,7 +301,7 @@ namespace PKIKeyRecovery
             // 
             this.panel2.Controls.Add(this.rbtnAttachNo);
             this.panel2.Controls.Add(this.rbtnAttachYes);
-            this.panel2.Location = new System.Drawing.Point(239, 345);
+            this.panel2.Location = new System.Drawing.Point(240, 320);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(197, 40);
             this.panel2.TabIndex = 27;
@@ -291,7 +313,7 @@ namespace PKIKeyRecovery
             this.rbtnAttachNo.Enabled = false;
             this.rbtnAttachNo.Location = new System.Drawing.Point(108, 7);
             this.rbtnAttachNo.Name = "rbtnAttachNo";
-            this.rbtnAttachNo.Size = new System.Drawing.Size(65, 30);
+            this.rbtnAttachNo.Size = new System.Drawing.Size(46, 22);
             this.rbtnAttachNo.TabIndex = 20;
             this.rbtnAttachNo.TabStop = true;
             this.rbtnAttachNo.Text = "No";
@@ -303,7 +325,7 @@ namespace PKIKeyRecovery
             this.rbtnAttachYes.Enabled = false;
             this.rbtnAttachYes.Location = new System.Drawing.Point(9, 7);
             this.rbtnAttachYes.Name = "rbtnAttachYes";
-            this.rbtnAttachYes.Size = new System.Drawing.Size(76, 30);
+            this.rbtnAttachYes.Size = new System.Drawing.Size(51, 22);
             this.rbtnAttachYes.TabIndex = 19;
             this.rbtnAttachYes.Text = "Yes";
             this.rbtnAttachYes.UseVisualStyleBackColor = true;
@@ -323,7 +345,7 @@ namespace PKIKeyRecovery
             this.rbtnEmailNo.Checked = true;
             this.rbtnEmailNo.Location = new System.Drawing.Point(109, 3);
             this.rbtnEmailNo.Name = "rbtnEmailNo";
-            this.rbtnEmailNo.Size = new System.Drawing.Size(65, 30);
+            this.rbtnEmailNo.Size = new System.Drawing.Size(46, 22);
             this.rbtnEmailNo.TabIndex = 20;
             this.rbtnEmailNo.TabStop = true;
             this.rbtnEmailNo.Text = "No";
@@ -335,7 +357,7 @@ namespace PKIKeyRecovery
             this.rbtnEmailYes.AutoSize = true;
             this.rbtnEmailYes.Location = new System.Drawing.Point(10, 3);
             this.rbtnEmailYes.Name = "rbtnEmailYes";
-            this.rbtnEmailYes.Size = new System.Drawing.Size(76, 30);
+            this.rbtnEmailYes.Size = new System.Drawing.Size(51, 22);
             this.rbtnEmailYes.TabIndex = 19;
             this.rbtnEmailYes.Text = "Yes";
             this.rbtnEmailYes.UseVisualStyleBackColor = true;
@@ -362,15 +384,15 @@ namespace PKIKeyRecovery
             // txtSenderEmail
             // 
             this.txtSenderEmail.Enabled = false;
-            this.txtSenderEmail.Location = new System.Drawing.Point(240, 89);
+            this.txtSenderEmail.Location = new System.Drawing.Point(240, 75);
             this.txtSenderEmail.Name = "txtSenderEmail";
-            this.txtSenderEmail.Size = new System.Drawing.Size(396, 32);
+            this.txtSenderEmail.Size = new System.Drawing.Size(396, 24);
             this.txtSenderEmail.TabIndex = 7;
             this.txtSenderEmail.TextChanged += new System.EventHandler(this.txtSenderEmail_TextChanged);
             // 
             // label10
             // 
-            this.label10.Location = new System.Drawing.Point(10, 89);
+            this.label10.Location = new System.Drawing.Point(10, 75);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(220, 26);
             this.label10.TabIndex = 22;
@@ -389,7 +411,7 @@ namespace PKIKeyRecovery
             // btnApply
             // 
             this.btnApply.Enabled = false;
-            this.btnApply.Location = new System.Drawing.Point(824, 806);
+            this.btnApply.Location = new System.Drawing.Point(824, 720);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(108, 34);
             this.btnApply.TabIndex = 11;
@@ -400,7 +422,7 @@ namespace PKIKeyRecovery
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(696, 806);
+            this.btnCancel.Location = new System.Drawing.Point(696, 720);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(108, 34);
             this.btnCancel.TabIndex = 10;
@@ -416,9 +438,9 @@ namespace PKIKeyRecovery
             this.groupBox2.Controls.Add(this.txtDiscDir);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.lblInvalidDiscovery);
-            this.groupBox2.Location = new System.Drawing.Point(10, 634);
+            this.groupBox2.Location = new System.Drawing.Point(10, 570);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(922, 150);
+            this.groupBox2.Size = new System.Drawing.Size(922, 126);
             this.groupBox2.TabIndex = 100;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "eDiscovery";
@@ -426,14 +448,14 @@ namespace PKIKeyRecovery
             // txtDiscEmail
             // 
             this.txtDiscEmail.Enabled = false;
-            this.txtDiscEmail.Location = new System.Drawing.Point(250, 95);
+            this.txtDiscEmail.Location = new System.Drawing.Point(250, 80);
             this.txtDiscEmail.Name = "txtDiscEmail";
-            this.txtDiscEmail.Size = new System.Drawing.Size(396, 32);
+            this.txtDiscEmail.Size = new System.Drawing.Size(396, 24);
             this.txtDiscEmail.TabIndex = 102;
             // 
             // label8
             // 
-            this.label8.Location = new System.Drawing.Point(10, 95);
+            this.label8.Location = new System.Drawing.Point(10, 80);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(220, 26);
             this.label8.TabIndex = 103;
@@ -442,7 +464,7 @@ namespace PKIKeyRecovery
             // 
             // btnDiscBrowse
             // 
-            this.btnDiscBrowse.Location = new System.Drawing.Point(793, 43);
+            this.btnDiscBrowse.Location = new System.Drawing.Point(793, 35);
             this.btnDiscBrowse.Name = "btnDiscBrowse";
             this.btnDiscBrowse.Size = new System.Drawing.Size(108, 34);
             this.btnDiscBrowse.TabIndex = 101;
@@ -453,49 +475,72 @@ namespace PKIKeyRecovery
             // txtDiscDir
             // 
             this.txtDiscDir.Enabled = false;
-            this.txtDiscDir.Location = new System.Drawing.Point(250, 45);
+            this.txtDiscDir.Location = new System.Drawing.Point(250, 35);
             this.txtDiscDir.Name = "txtDiscDir";
-            this.txtDiscDir.Size = new System.Drawing.Size(537, 32);
+            this.txtDiscDir.Size = new System.Drawing.Size(537, 24);
             this.txtDiscDir.TabIndex = 10;
             // 
             // label9
             // 
-            this.label9.Location = new System.Drawing.Point(10, 45);
+            this.label9.Location = new System.Drawing.Point(10, 35);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(220, 26);
             this.label9.TabIndex = 11;
             this.label9.Text = "Recovery Directory:";
             this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // txtSmtpUser
+            // chkAlpha
             // 
-            this.txtSmtpUser.Enabled = false;
-            this.txtSmtpUser.Location = new System.Drawing.Point(240, 195);
-            this.txtSmtpUser.Name = "txtSmtpUser";
-            this.txtSmtpUser.Size = new System.Drawing.Size(396, 32);
-            this.txtSmtpUser.TabIndex = 103;
-            this.txtSmtpUser.TextChanged += new System.EventHandler(this.txtSmtpUser_TextChanged);
+            this.chkAlpha.AutoSize = true;
+            this.chkAlpha.Checked = true;
+            this.chkAlpha.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAlpha.Location = new System.Drawing.Point(250, 100);
+            this.chkAlpha.Name = "chkAlpha";
+            this.chkAlpha.Size = new System.Drawing.Size(169, 22);
+            this.chkAlpha.TabIndex = 102;
+            this.chkAlpha.Text = "Include Alpha [a-zA-Z]";
+            this.chkAlpha.UseVisualStyleBackColor = true;
+            this.chkAlpha.CheckedChanged += new System.EventHandler(this.chkAlpha_CheckedChanged);
             // 
-            // label12
+            // chkDigits
             // 
-            this.label12.Location = new System.Drawing.Point(10, 195);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(220, 26);
-            this.label12.TabIndex = 104;
-            this.label12.Text = "SMTP Username:";
-            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkDigits.AutoSize = true;
+            this.chkDigits.Checked = true;
+            this.chkDigits.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDigits.Location = new System.Drawing.Point(430, 100);
+            this.chkDigits.Name = "chkDigits";
+            this.chkDigits.Size = new System.Drawing.Size(147, 22);
+            this.chkDigits.TabIndex = 103;
+            this.chkDigits.Text = "Include Digits [0-9]";
+            this.chkDigits.UseVisualStyleBackColor = true;
+            this.chkDigits.CheckedChanged += new System.EventHandler(this.chkDigits_CheckedChanged);
+            // 
+            // chkSymbols
+            // 
+            this.chkSymbols.AutoSize = true;
+            this.chkSymbols.Checked = true;
+            this.chkSymbols.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSymbols.Location = new System.Drawing.Point(595, 100);
+            this.chkSymbols.Name = "chkSymbols";
+            this.chkSymbols.Size = new System.Drawing.Size(195, 22);
+            this.chkSymbols.TabIndex = 104;
+            this.chkSymbols.Text = "Include Symbols (!@#$...)";
+            this.chkSymbols.UseVisualStyleBackColor = true;
+            this.chkSymbols.CheckedChanged += new System.EventHandler(this.chkSymbols_CheckedChanged);
             // 
             // Config
             // 
             this.AcceptButton = this.btnApply;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 26F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(960, 852);
+            this.ClientSize = new System.Drawing.Size(960, 767);
+            this.Controls.Add(this.chkSymbols);
+            this.Controls.Add(this.chkDigits);
+            this.Controls.Add(this.chkAlpha);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.lblPwdLength);
             this.Controls.Add(this.trkPwdLength);
             this.Controls.Add(this.label2);
@@ -568,5 +613,8 @@ namespace PKIKeyRecovery
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox txtSmtpUser;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.CheckBox chkAlpha;
+        private System.Windows.Forms.CheckBox chkDigits;
+        private System.Windows.Forms.CheckBox chkSymbols;
     }
 }

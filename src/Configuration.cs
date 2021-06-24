@@ -11,7 +11,6 @@ using EasyPKIView;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using MJBLogger;
 
 namespace PKIKeyRecovery
 {
@@ -23,6 +22,7 @@ namespace PKIKeyRecovery
 
     public class Configuration
     {
+        public int Version { get; set; } = 0;
         public string DestinationDirectory { get; set; } = string.Empty;
         
         public string DiscoveryDirectory { get; set; } = string.Empty;
@@ -62,11 +62,25 @@ namespace PKIKeyRecovery
         public string DiscoveryEmail { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
 
-        internal bool Valid => Directory.Exists(DestinationDirectory) &&
-                               (!UseEmail ||
-                               (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
-                               DiscoveryEmail.IsValidEmail() &&
-                               SenderEmail.IsValidEmail()));
+        internal bool Valid()
+        {
+            bool result = false;
+            try
+            {
+                result = Version > 0 &&
+                         Directory.Exists(DestinationDirectory) &&
+                         (!UseEmail ||
+                         (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
+                         DiscoveryEmail.IsValidEmail() &&
+                         SenderEmail.IsValidEmail()));
+                return result;
+            }
+            catch(Exception ex)
+            {
+                RuntimeContext.Log.Exception(ex);
+                return false;
+            }
+        }
 
         internal string WorkingDirectory => $".\\working_{DateTime.Now:yyyy-MM-dd_hhmmss}";
 
@@ -77,6 +91,7 @@ namespace PKIKeyRecovery
                 File.Delete(Constants.ConfFile);
             }
 
+            Version = Constants.ConfigurationVersion;
             var unprettyJson = JsonConvert.SerializeObject(this);
             var formattedJson = JToken.Parse(unprettyJson).ToString(Formatting.Indented);
 
