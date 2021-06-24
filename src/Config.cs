@@ -81,6 +81,10 @@ namespace PKIKeyRecovery
                     }
 
                 }
+                else
+                {
+                    RuntimeContext.Log.Warning($"A configuration file was found, but it contains a version {conf.Version} configuration. This distribution of KRTool requires configuration version {Constants.ConfigurationVersion}. Could not pre-populate configuration GUI");
+                }
                 btnApply.Enabled = false;
             }
 

@@ -62,12 +62,25 @@ namespace PKIKeyRecovery
         public string DiscoveryEmail { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
 
-        internal bool Valid => Version > 0 &&
-                               Directory.Exists(DestinationDirectory) &&
-                               (!UseEmail ||
-                               (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
-                               DiscoveryEmail.IsValidEmail() &&
-                               SenderEmail.IsValidEmail()));
+        internal bool Valid()
+        {
+            bool result = false;
+            try
+            {
+                result = Version > 0 &&
+                         Directory.Exists(DestinationDirectory) &&
+                         (!UseEmail ||
+                         (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
+                         DiscoveryEmail.IsValidEmail() &&
+                         SenderEmail.IsValidEmail()));
+                return result;
+            }
+            catch(Exception ex)
+            {
+                RuntimeContext.Log.Exception(ex);
+                return false;
+            }
+        }
 
         internal string WorkingDirectory => $".\\working_{DateTime.Now:yyyy-MM-dd_hhmmss}";
 

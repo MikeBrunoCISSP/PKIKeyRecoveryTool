@@ -16,7 +16,7 @@ namespace PKIKeyRecovery
             Application.SetCompatibleTextRenderingDefault(false);
 
             RuntimeContext.Init();
-            if (RuntimeContext.Conf.Valid)
+            if (RuntimeContext.Usable)
             {
                 Application.Run(new Form1());
             }
