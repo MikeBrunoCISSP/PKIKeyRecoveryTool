@@ -99,7 +99,6 @@ namespace PKIKeyRecovery
                         if (Result == DialogResult.OK)
                         {
                             Conf = ConfWindow.Conf;
-                            Conf.Version = Constants.ConfigurationVersion;
                             gotConf = Conf.Valid();
                         }
                     }

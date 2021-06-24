@@ -91,6 +91,7 @@ namespace PKIKeyRecovery
                 File.Delete(Constants.ConfFile);
             }
 
+            Version = Constants.ConfigurationVersion;
             var unprettyJson = JsonConvert.SerializeObject(this);
             var formattedJson = JToken.Parse(unprettyJson).ToString(Formatting.Indented);
 
