@@ -11,7 +11,6 @@ using EasyPKIView;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using MJBLogger;
 
 namespace PKIKeyRecovery
 {
@@ -23,6 +22,7 @@ namespace PKIKeyRecovery
 
     public class Configuration
     {
+        public int Version { get; set; } = 0;
         public string DestinationDirectory { get; set; } = string.Empty;
         
         public string DiscoveryDirectory { get; set; } = string.Empty;
@@ -62,7 +62,8 @@ namespace PKIKeyRecovery
         public string DiscoveryEmail { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
 
-        internal bool Valid => Directory.Exists(DestinationDirectory) &&
+        internal bool Valid => Version > 0 &&
+                               Directory.Exists(DestinationDirectory) &&
                                (!UseEmail ||
                                (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
                                DiscoveryEmail.IsValidEmail() &&

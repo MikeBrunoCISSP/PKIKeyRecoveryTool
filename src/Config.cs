@@ -10,7 +10,6 @@ namespace PKIKeyRecovery
         internal Configuration Conf = null;
 
         private bool destDirSet = false;
-        private bool discDirSet = false;
         private bool useEmail = false;
         private bool smtpServerSet = false;
         private bool smtpPortSet = true;
@@ -19,7 +18,7 @@ namespace PKIKeyRecovery
         private bool discoveryEmailSet = false;
         private bool senderEmailSet = false;
 
-        private bool ConfigSet => destDirSet && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
+        private bool ConfigSet => destDirSet && (chkAlpha.Checked || chkDigits.Checked || chkSymbols.Checked) && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
 
         public Config()
         {
@@ -41,7 +40,6 @@ namespace PKIKeyRecovery
                     txtDiscDir.Enabled = true;
                     txtDiscDir.Text = conf.DestinationDirectory;
                     txtDiscDir.Enabled = false;
-                    discDirSet = true;
                 }
 
                 trkPwdLength.Value = conf.PasswordLength;
@@ -198,7 +196,10 @@ namespace PKIKeyRecovery
             Conf = new Configuration()
             {
                 DestinationDirectory = txtDestDir.Text,
-                PasswordLength = trkPwdLength.Value
+                PasswordLength = trkPwdLength.Value,
+                UseAlphas = chkAlpha.Checked,
+                UseDigits = chkDigits.Checked,
+                UseSymbols = chkSymbols.Checked
             };
 
             if (rbtnEmailYes.Checked)
@@ -235,7 +236,6 @@ namespace PKIKeyRecovery
             if (ChooseFolder(out string path))
             {
                 txtDiscDir.Text = path;
-                discDirSet = true;
             }
         }
 
@@ -260,6 +260,21 @@ namespace PKIKeyRecovery
         private void txtSmtpUser_TextChanged(object sender, EventArgs e)
         {
             smtpUsernameSet = !string.IsNullOrEmpty(txtSmtpUser.Text);
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkAlpha_CheckedChanged(object sender, EventArgs e)
+        {
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkDigits_CheckedChanged(object sender, EventArgs e)
+        {
+            btnApply.Enabled = ConfigSet;
+        }
+
+        private void chkSymbols_CheckedChanged(object sender, EventArgs e)
+        {
             btnApply.Enabled = ConfigSet;
         }
     }

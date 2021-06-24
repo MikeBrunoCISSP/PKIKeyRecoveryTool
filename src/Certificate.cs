@@ -19,7 +19,6 @@ namespace PKIKeyRecovery
 
         int index;
         public bool recovered;
-        MJBLog log;
 
         public Certificate(string sn, 
                            string tmpl, 

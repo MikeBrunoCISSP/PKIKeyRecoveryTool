@@ -11,7 +11,7 @@ using System.DirectoryServices.ActiveDirectory;
 using EasyPKIView;
 using MJBLogger;
 using Newtonsoft.Json;
-
+using MoreLinq;
 
 namespace PKIKeyRecovery
 {
@@ -40,48 +40,93 @@ namespace PKIKeyRecovery
 
         internal static void Init()
         {
+            Log = new MJBLog();
+            try
+            {
+                Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
+            }
+            catch { }
+            Log.Banner();
+            Log.Info($"Logging verbosity setting: {Log.GetLevel()}");
+
+            Log.Verbose(@"Loading configuration...");
             bool gotConf = false;
             if (File.Exists(Constants.ConfFile))
             {
                 try
                 {
                     Conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
-                    gotConf = null != Conf;
+                    if (null == Conf)
+                    {
+                        Log.Warning(@"Configuration file exists but could not be loaded.");
+                    }
+                    else
+                    {
+                        if (Conf.Version == Constants.ConfigurationVersion)
+                        {
+                            gotConf = true;
+                        }
+                        else
+                        {
+                            Log.Warning($"Configuration version is not compatible with this version of KRTool.");
+                        }
+                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log.Exception(ex, @"Error loading configuration file");
+                }
             }
 
             if (!gotConf)
             {
-                using (var ConfWindow = new Config())
+                Log.Info(@"Could not find configuration file, or it was unusable. Displaying configuration GUI...");
+
+                try
                 {
-                    var Result = ConfWindow.ShowDialog();
-                    if (Result == DialogResult.OK)
+                    using (var ConfWindow = new Config())
                     {
-                        Conf = ConfWindow.Conf;
-                        gotConf = true;
+                        var Result = ConfWindow.ShowDialog();
+                        if (Result == DialogResult.OK)
+                        {
+                            Conf = ConfWindow.Conf;
+                            gotConf = true;
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Log.Exception(ex, @"Unable to capture configuration from GUI");
                 }
 
                 if (!gotConf)
                 {
-                    MessageBox.Show(@"Failed to initialize configuration", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Log.Critical(@"Failed to initialize configuration");
+                    MessageBox.Show("Failed to initialize configuration.\r\nCheck log for details", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
                 }
             }
 
-            Log = new MJBLog();
-            Log.SetLevel(ConfigurationManager.AppSettings[AppSettings.LogLevel]);
-            Log.Banner();
+            Log.Verbose(@"Collecting PKI inforation from Active Directory...");
 
-            Log.Verbose(@"Enumerating all Enterprise CAs existing in AD...");
-
-            using (var WaitForm = new PleaseWait())
+            try
             {
-                WaitForm.Show();
-                WaitForm.Update();
-                CAs = ADCertificationAuthority.GetAll()
-                                              .Where(p => p.Templates.Where(q => q.RequiresPrivateKeyArchival).Any()).ToList();
+                using (var WaitForm = new PleaseWait())
+                {
+                    WaitForm.Show();
+                    WaitForm.Update();
+                    var AllCAs = ADCertificationAuthority.GetAll();
+                    Log.Verbose(@"Certification Authorities found in Active Directory:");
+                    AllCAs.ForEach(p => Log.Echo(p.DisplayName, level: LogLevel.Verbose));
+
+                    CAs = AllCAs.Where(p => p.Templates.Where(q => q.RequiresPrivateKeyArchival).Any()).ToList();
+                    Log.Verbose(@"Certification Authorities advertising certificate template(s) that require key archival:");
+                    CAs.ForEach(p => Log.Echo(p.DisplayName, level: LogLevel.Verbose));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, @"Field to collect PKI information from Active Directory");
             }
 
             if (CAs.Count < 1)

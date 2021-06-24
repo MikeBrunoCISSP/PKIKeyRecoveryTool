@@ -64,8 +64,7 @@ namespace PKIKeyRecovery
 
         public bool valid,
                     fullSuccess;
-        bool hasArchivedCerts,
-             hasUnrecoverableKeys,
+        bool hasUnrecoverableKeys,
              enabled;
 
         int recoveredKeys;
@@ -84,7 +83,6 @@ namespace PKIKeyRecovery
             keyFiles = new List<string>();
 
             GetUserDetails(username);
-            hasArchivedCerts = false;
             hasUnrecoverableKeys = false;
             fullSuccess = true;
             recoveredKeys = 0;
@@ -121,7 +119,6 @@ namespace PKIKeyRecovery
 
                 default:
                     RuntimeContext.Log.Info($"{count} certificates found with archived keys for user {sAMAccountName}");
-                    hasArchivedCerts = true;
                     valid = true;
                     return;
             }
