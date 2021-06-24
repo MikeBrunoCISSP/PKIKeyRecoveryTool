@@ -135,6 +135,8 @@ namespace PKIKeyRecovery
             rbtnAttachNo.Enabled = rbtnEmailYes.Checked;
             txtDiscEmail.Enabled = rbtnEmailYes.Checked;
             txtSenderEmail.Enabled = rbtnEmailYes.Checked;
+            rbtnDeleteYes.Enabled = rbtnEmailYes.Checked;
+            rbtnDeleteNo.Enabled = rbtnEmailYes.Checked;
 
             btnApply.Enabled = ConfigSet;
         }
