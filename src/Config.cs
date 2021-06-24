@@ -27,56 +27,60 @@ namespace PKIKeyRecovery
             {
                 var conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
 
-                if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+                if (conf.Version == Constants.ConfigurationVersion)
                 {
-                    txtDestDir.Enabled = true;
-                    txtDestDir.Text = conf.DestinationDirectory;
-                    txtDestDir.Enabled = false;
-                    destDirSet = true;
+
+                    if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+                    {
+                        txtDestDir.Enabled = true;
+                        txtDestDir.Text = conf.DestinationDirectory;
+                        txtDestDir.Enabled = false;
+                        destDirSet = true;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
+                    {
+                        txtDiscDir.Enabled = true;
+                        txtDiscDir.Text = conf.DestinationDirectory;
+                        txtDiscDir.Enabled = false;
+                    }
+
+                    trkPwdLength.Value = conf.PasswordLength;
+                    rbtnEmailYes.Checked = conf.UseEmail;
+
+                    txtSmtpServer.Text = conf.SmtpServer;
+                    smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+
+                    txtSmtpUser.Text = conf.SmtpUsername;
+                    txtSmtpPassword.Text = conf.SmtpPassword;
+
+                    txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
+                    smtpPortSet = true;
+
+                    rbtnAttachYes.Checked = conf.AttachToEmail;
+                    rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
+
+                    txtDiscEmail.Text = conf.DiscoveryEmail;
+                    if (txtDiscEmail.Text.IsValidEmail())
+                    {
+                        discoveryEmailSet = true;
+                    }
+                    else
+                    {
+                        lblInvalidDiscovery.Text = Constants.InvalidEmail;
+                    }
+
+                    txtSenderEmail.Text = conf.SenderEmail;
+                    if (txtSenderEmail.Text.IsValidEmail())
+                    {
+                        senderEmailSet = true;
+                    }
+                    else
+                    {
+                        lblInvalidSender.Text = Constants.InvalidEmail;
+                    }
+
                 }
-
-                if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
-                {
-                    txtDiscDir.Enabled = true;
-                    txtDiscDir.Text = conf.DestinationDirectory;
-                    txtDiscDir.Enabled = false;
-                }
-
-                trkPwdLength.Value = conf.PasswordLength;
-                rbtnEmailYes.Checked = conf.UseEmail;
-
-                txtSmtpServer.Text = conf.SmtpServer;
-                smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
-
-                txtSmtpUser.Text = conf.SmtpUsername;
-                txtSmtpPassword.Text = conf.SmtpPassword;
-
-                txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
-                smtpPortSet = true;
-
-                rbtnAttachYes.Checked = conf.AttachToEmail;
-                rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
-
-                txtDiscEmail.Text = conf.DiscoveryEmail;
-                if (txtDiscEmail.Text.IsValidEmail())
-                {
-                    discoveryEmailSet = true;
-                }
-                else
-                {
-                    lblInvalidDiscovery.Text = Constants.InvalidEmail;
-                }
-
-                txtSenderEmail.Text = conf.SenderEmail;
-                if (txtSenderEmail.Text.IsValidEmail())
-                {
-                    senderEmailSet = true;
-                }
-                else
-                {
-                    lblInvalidSender.Text = Constants.InvalidEmail;
-                }
-
                 btnApply.Enabled = false;
             }
 
