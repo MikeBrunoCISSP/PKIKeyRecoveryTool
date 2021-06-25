@@ -390,6 +390,22 @@ namespace PKIKeyRecovery
             btnRecoverKeys.Enabled = (cboCA.SelectedIndex > -1 && cboTemplate.SelectedIndex > -1) && (rbtnUser.Checked ^ rbtnEDiscovery.Checked) && SelectedUser != null;
         }
 
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RuntimeContext.UpdateConf(initialize: true);
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var About = new AboutBox();
+            About.ShowDialog();
+        }
+
 
         //private bool SendEmail(User user, bool eDiscovery)
         //{

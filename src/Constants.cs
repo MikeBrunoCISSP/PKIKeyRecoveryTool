@@ -48,6 +48,7 @@ namespace PKIKeyRecovery
     {
         internal const string Success = @"Success.png";
         internal const string Error = @"Error.png";
+        internal const string Logo = @"logo.png";
     }
 
     internal static class Constants

@@ -72,6 +72,7 @@ namespace PKIKeyRecovery
             this.chkAlpha = new System.Windows.Forms.CheckBox();
             this.chkDigits = new System.Windows.Forms.CheckBox();
             this.chkSymbols = new System.Windows.Forms.CheckBox();
+            this.btnOK = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trkPwdLength)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -411,7 +412,7 @@ namespace PKIKeyRecovery
             // btnApply
             // 
             this.btnApply.Enabled = false;
-            this.btnApply.Location = new System.Drawing.Point(824, 720);
+            this.btnApply.Location = new System.Drawing.Point(824, 721);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(108, 34);
             this.btnApply.TabIndex = 11;
@@ -422,7 +423,7 @@ namespace PKIKeyRecovery
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(696, 720);
+            this.btnCancel.Location = new System.Drawing.Point(710, 721);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(108, 34);
             this.btnCancel.TabIndex = 10;
@@ -528,13 +529,25 @@ namespace PKIKeyRecovery
             this.chkSymbols.UseVisualStyleBackColor = true;
             this.chkSymbols.CheckedChanged += new System.EventHandler(this.chkSymbols_CheckedChanged);
             // 
+            // btnOK
+            // 
+            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnOK.Location = new System.Drawing.Point(596, 721);
+            this.btnOK.Name = "btnOK";
+            this.btnOK.Size = new System.Drawing.Size(108, 34);
+            this.btnOK.TabIndex = 105;
+            this.btnOK.Text = "OK";
+            this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+            // 
             // Config
             // 
             this.AcceptButton = this.btnApply;
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(960, 767);
+            this.ClientSize = new System.Drawing.Size(942, 767);
+            this.Controls.Add(this.btnOK);
             this.Controls.Add(this.chkSymbols);
             this.Controls.Add(this.chkDigits);
             this.Controls.Add(this.chkAlpha);
@@ -555,6 +568,7 @@ namespace PKIKeyRecovery
             this.Name = "Config";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "KRTool - Configuration";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Config_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.trkPwdLength)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -616,5 +630,6 @@ namespace PKIKeyRecovery
         private System.Windows.Forms.CheckBox chkAlpha;
         private System.Windows.Forms.CheckBox chkDigits;
         private System.Windows.Forms.CheckBox chkSymbols;
+        private System.Windows.Forms.Button btnOK;
     }
 }

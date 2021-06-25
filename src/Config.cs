@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using Tulpep.NotificationWindow;
 
 namespace PKIKeyRecovery
 {
@@ -20,75 +21,72 @@ namespace PKIKeyRecovery
 
         private bool ConfigSet => destDirSet && (chkAlpha.Checked || chkDigits.Checked || chkSymbols.Checked) && (!useEmail || smtpServerSet && smtpPortSet && discoveryEmailSet && senderEmailSet && !(smtpUsernameSet ^ smtpPasswordSet));
 
-        public Config()
+        public Config(Configuration conf = null)
         {
             InitializeComponent();
-            if (File.Exists(Constants.ConfFile))
+            var icon = Properties.Resources.pki;
+            this.Icon = icon;
+
+            if (null != conf)
             {
-                var conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
-
-                if (conf.Version == Constants.ConfigurationVersion)
-                {
-
-                    if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
-                    {
-                        txtDestDir.Enabled = true;
-                        txtDestDir.Text = conf.DestinationDirectory;
-                        txtDestDir.Enabled = false;
-                        destDirSet = true;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
-                    {
-                        txtDiscDir.Enabled = true;
-                        txtDiscDir.Text = conf.DestinationDirectory;
-                        txtDiscDir.Enabled = false;
-                    }
-
-                    trkPwdLength.Value = conf.PasswordLength;
-                    rbtnEmailYes.Checked = conf.UseEmail;
-
-                    txtSmtpServer.Text = conf.SmtpServer;
-                    smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
-
-                    txtSmtpUser.Text = conf.SmtpUsername;
-                    txtSmtpPassword.Text = conf.SmtpPassword;
-
-                    txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
-                    smtpPortSet = true;
-
-                    rbtnAttachYes.Checked = conf.AttachToEmail;
-                    rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
-
-                    txtDiscEmail.Text = conf.DiscoveryEmail;
-                    if (txtDiscEmail.Text.IsValidEmail())
-                    {
-                        discoveryEmailSet = true;
-                    }
-                    else
-                    {
-                        lblInvalidDiscovery.Text = Constants.InvalidEmail;
-                    }
-
-                    txtSenderEmail.Text = conf.SenderEmail;
-                    if (txtSenderEmail.Text.IsValidEmail())
-                    {
-                        senderEmailSet = true;
-                    }
-                    else
-                    {
-                        lblInvalidSender.Text = Constants.InvalidEmail;
-                    }
-
-                }
-                else
-                {
-                    RuntimeContext.Log.Warning($"A configuration file was found, but it contains a version {conf.Version} configuration. This distribution of KRTool requires configuration version {Constants.ConfigurationVersion}. Could not pre-populate configuration GUI");
-                }
-                btnApply.Enabled = false;
+                Initialize(conf);
             }
 
             lblPwdLength.Text = trkPwdLength.Value.ToString();
+            btnApply.Enabled = false;
+        }
+
+        private void Initialize(Configuration conf)
+        {
+            if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+            {
+                txtDestDir.Enabled = true;
+                txtDestDir.Text = conf.DestinationDirectory;
+                txtDestDir.Enabled = false;
+                destDirSet = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
+            {
+                txtDiscDir.Enabled = true;
+                txtDiscDir.Text = conf.DestinationDirectory;
+                txtDiscDir.Enabled = false;
+            }
+
+            trkPwdLength.Value = conf.PasswordLength;
+            rbtnEmailYes.Checked = conf.UseEmail;
+
+            txtSmtpServer.Text = conf.SmtpServer;
+            smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+
+            txtSmtpUser.Text = conf.SmtpUsername;
+            txtSmtpPassword.Text = conf.SmtpPassword;
+
+            txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
+            smtpPortSet = true;
+
+            rbtnAttachYes.Checked = conf.AttachToEmail;
+            rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
+
+            txtDiscEmail.Text = conf.DiscoveryEmail;
+            if (txtDiscEmail.Text.IsValidEmail())
+            {
+                discoveryEmailSet = true;
+            }
+            else
+            {
+                lblInvalidDiscovery.Text = Constants.InvalidEmail;
+            }
+
+            txtSenderEmail.Text = conf.SenderEmail;
+            if (txtSenderEmail.Text.IsValidEmail())
+            {
+                senderEmailSet = true;
+            }
+            else
+            {
+                lblInvalidSender.Text = Constants.InvalidEmail;
+            }
         }
 
         private void trkPwdLength_Scroll(object sender, EventArgs e)
@@ -225,10 +223,15 @@ namespace PKIKeyRecovery
             }
 
             Conf.Commit();
-            MessageBox.Show(@"Configuration saved.", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            using (var popup = new PopupNotifier())
+            {
+                popup.TitleText = @"KRTool";
+                popup.ContentText = @"KRTool Configuration changes saved";
+                popup.Popup();
+            }
         }
+
+
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
@@ -286,6 +289,23 @@ namespace PKIKeyRecovery
         private void chkSymbols_CheckedChanged(object sender, EventArgs e)
         {
             btnApply.Enabled = ConfigSet;
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void Config_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (null == Conf || !Conf.Valid())
+            {
+                DialogResult = DialogResult.Cancel;
+            }
+            else
+            {
+                DialogResult = DialogResult.OK;
+            }
         }
     }
 }

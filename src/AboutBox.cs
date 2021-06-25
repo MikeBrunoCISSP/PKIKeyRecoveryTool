@@ -13,6 +13,9 @@ namespace PKIKeyRecovery
         public AboutBox()
         {
             InitializeComponent();
+            var image = new Bitmap(ImageFile.Logo);
+            pictureBox1.Image = image;
+            pictureBox1.Update();
         }
 
         #region Assembly Attribute Accessors

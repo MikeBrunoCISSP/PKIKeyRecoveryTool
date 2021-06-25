@@ -209,6 +209,9 @@
     <Content Include="Error.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Success.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

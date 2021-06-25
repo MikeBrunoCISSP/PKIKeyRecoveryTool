@@ -64,11 +64,16 @@ namespace PKIKeyRecovery
 
         internal bool Valid()
         {
+            if (Version != Constants.ConfigurationVersion)
+            {
+                RuntimeContext.Log.Error($"A configuration file was found, but it contains a version {Version} configuration. This distribution of KRTool requires configuration version {Constants.ConfigurationVersion}");
+                return false;
+            }
+
             bool result = false;
             try
             {
-                result = Version > 0 &&
-                         Directory.Exists(DestinationDirectory) &&
+                result = Directory.Exists(DestinationDirectory) &&
                          (!UseEmail ||
                          (Uri.CheckHostName(SmtpServer) != UriHostNameType.Unknown &&
                          DiscoveryEmail.IsValidEmail() &&
