@@ -54,6 +54,7 @@ namespace PKIKeyRecovery
     internal static class Constants
     {
         internal const string InvalidEmail = @"Invalid Email";
+        internal const string InvalidHost = @"Invalid Hostname";
         internal static readonly string ConfFile = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\KRTool\\Configuration.json";
         internal const string Unavailable = nameof(Unavailable);
         internal const string UserNotFound = @"User not found";

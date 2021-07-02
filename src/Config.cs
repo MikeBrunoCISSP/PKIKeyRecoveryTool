@@ -60,6 +60,10 @@ namespace PKIKeyRecovery
 
                 txtSmtpServer.Text = conf.SmtpServer;
                 smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+                if (useEmail)
+                {
+                    lblInvalidServer.Text = smtpServerSet ? string.Empty : Constants.InvalidHost;
+                }
 
                 txtSmtpUser.Text = conf.SmtpUsername;
                 txtSmtpPassword.Text = conf.SmtpPassword;
@@ -77,7 +81,7 @@ namespace PKIKeyRecovery
                 }
                 else
                 {
-                    lblInvalidDiscovery.Text = Constants.InvalidEmail;
+                    lblInvalidDiscovery.Text = conf.UseEmail ? Constants.InvalidEmail : string.Empty;
                 }
 
                 txtSenderEmail.Text = conf.SenderEmail;
@@ -87,7 +91,7 @@ namespace PKIKeyRecovery
                 }
                 else
                 {
-                    lblInvalidSender.Text = Constants.InvalidEmail;
+                    lblInvalidSender.Text = conf.UseEmail ? Constants.InvalidEmail : string.Empty;
                 }
             }
         }
