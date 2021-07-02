@@ -59,7 +59,7 @@ namespace PKIKeyRecovery
             Log.Info($"Logging verbosity setting: {Log.GetLevel()}");
 
             Log.Verbose(@"Loading configuration...");
-            Conf = GetConf();
+            GetConf();
 
             //bool gotConf = false;
             //if (File.Exists(Constants.ConfFile))
