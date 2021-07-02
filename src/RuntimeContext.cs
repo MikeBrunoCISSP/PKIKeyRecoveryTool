@@ -61,62 +61,6 @@ namespace PKIKeyRecovery
             Log.Verbose(@"Loading configuration...");
             GetConf();
 
-            //bool gotConf = false;
-            //if (File.Exists(Constants.ConfFile))
-            //{
-            //    try
-            //    {
-            //        Conf = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(Constants.ConfFile));
-            //        if (null == Conf || !Conf.Valid())
-            //        {
-            //            Log.Warning(@"Configuration file exists but could not be loaded.");
-            //        }
-            //        else
-            //        {
-            //            if (Conf.Version == Constants.ConfigurationVersion)
-            //            {
-            //                gotConf = true;
-            //            }
-            //            else
-            //            {
-            //                Log.Warning($"A configuration file was found, but it contains a version {Conf.Version} configuration. This distribution of KRTool requires configuration version {Constants.ConfigurationVersion}");
-            //            }
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log.Exception(ex, @"Error loading configuration file");
-            //    }
-            //}
-
-            //if (!gotConf)
-            //{
-            //    Log.Info(@"Could not find configuration file, or it was unusable. Displaying configuration GUI...");
-
-            //    try
-            //    {
-            //        using (var ConfWindow = new Config())
-            //        {
-            //            var Result = ConfWindow.ShowDialog();
-            //            if (Result == DialogResult.OK)
-            //            {
-            //                Conf = ConfWindow.Conf;
-            //                gotConf = Conf.Valid();
-            //            }
-            //        }
-            //    }
-            //    catch (Exception ex2)
-            //    {
-            //        Log.Exception(ex2, @"Unable to capture configuration from GUI");
-            //    }
-
-            //    if (!gotConf)
-            //    {
-            //        Log.Critical(@"Failed to initialize configuration");
-            //        MessageBox.Show("Failed to initialize configuration.\r\nCheck log for details", @"KRTool", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //    }
-            //}
-
             if (null != Conf)
             {
                 Log.Verbose(@"Collecting PKI information from Active Directory...");

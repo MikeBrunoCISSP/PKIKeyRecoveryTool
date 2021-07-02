@@ -376,7 +376,7 @@ namespace PKIKeyRecovery
             // lblInvalidSender
             // 
             this.lblInvalidSender.ForeColor = System.Drawing.Color.Red;
-            this.lblInvalidSender.Location = new System.Drawing.Point(642, 337);
+            this.lblInvalidSender.Location = new System.Drawing.Point(642, 75);
             this.lblInvalidSender.Name = "lblInvalidSender";
             this.lblInvalidSender.Size = new System.Drawing.Size(220, 26);
             this.lblInvalidSender.TabIndex = 24;

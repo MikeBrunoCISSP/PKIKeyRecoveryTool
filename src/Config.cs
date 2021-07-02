@@ -38,19 +38,22 @@ namespace PKIKeyRecovery
 
         private void Initialize(Configuration conf)
         {
-            if (!string.IsNullOrWhiteSpace(txtDestDir.Text) && Directory.Exists(txtDestDir.Text))
+            if (null != conf)
             {
-                txtDestDir.Enabled = true;
-                txtDestDir.Text = conf.DestinationDirectory;
-                txtDestDir.Enabled = false;
-                destDirSet = true;
-            }
+                if (!string.IsNullOrWhiteSpace(conf.DestinationDirectory) && Directory.Exists(conf.DestinationDirectory))
+                {
+                    txtDestDir.Enabled = true;
+                    txtDestDir.Text = conf.DestinationDirectory;
+                    txtDestDir.Enabled = false;
+                    destDirSet = true;
+                }
 
-            if (!string.IsNullOrWhiteSpace(txtDiscDir.Text) && Directory.Exists(txtDiscDir.Text))
-            {
-                txtDiscDir.Enabled = true;
-                txtDiscDir.Text = conf.DestinationDirectory;
-                txtDiscDir.Enabled = false;
+                if (!string.IsNullOrWhiteSpace(conf.DiscoveryDirectory) && Directory.Exists(conf.DiscoveryDirectory))
+                {
+                    txtDiscDir.Enabled = true;
+                    txtDiscDir.Text = conf.DestinationDirectory;
+                    txtDiscDir.Enabled = false;
+                }
             }
 
             trkPwdLength.Value = conf.PasswordLength;
