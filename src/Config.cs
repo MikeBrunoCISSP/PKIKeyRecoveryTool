@@ -311,5 +311,10 @@ namespace PKIKeyRecovery
                 DialogResult = DialogResult.OK;
             }
         }
+
+        private void txtDiscDir_TextChanged(object sender, EventArgs e)
+        {
+            btnApply.Enabled = ConfigSet;
+        }
     }
 }

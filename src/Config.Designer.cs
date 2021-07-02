@@ -471,6 +471,7 @@ namespace PKIKeyRecovery
             this.txtDiscDir.Name = "txtDiscDir";
             this.txtDiscDir.Size = new System.Drawing.Size(537, 32);
             this.txtDiscDir.TabIndex = 10;
+            this.txtDiscDir.TextChanged += new System.EventHandler(this.txtDiscDir_TextChanged);
             // 
             // label9
             // 
