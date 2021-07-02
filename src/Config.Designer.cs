@@ -56,7 +56,6 @@ namespace PKIKeyRecovery
             this.panel1 = new System.Windows.Forms.Panel();
             this.rbtnEmailNo = new System.Windows.Forms.RadioButton();
             this.rbtnEmailYes = new System.Windows.Forms.RadioButton();
-            this.lblInvalidServer = new System.Windows.Forms.Label();
             this.lblInvalidSender = new System.Windows.Forms.Label();
             this.txtSenderEmail = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
@@ -222,7 +221,6 @@ namespace PKIKeyRecovery
             this.groupBox1.Controls.Add(this.label11);
             this.groupBox1.Controls.Add(this.panel2);
             this.groupBox1.Controls.Add(this.panel1);
-            this.groupBox1.Controls.Add(this.lblInvalidServer);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.lblInvalidSender);
             this.groupBox1.Controls.Add(this.txtSmtpPassword);
@@ -364,15 +362,6 @@ namespace PKIKeyRecovery
             this.rbtnEmailYes.UseVisualStyleBackColor = true;
             this.rbtnEmailYes.CheckedChanged += new System.EventHandler(this.rbtnEmailYes_CheckedChanged);
             // 
-            // lblInvalidServer
-            // 
-            this.lblInvalidServer.ForeColor = System.Drawing.Color.Red;
-            this.lblInvalidServer.Location = new System.Drawing.Point(661, 89);
-            this.lblInvalidServer.Name = "lblInvalidServer";
-            this.lblInvalidServer.Size = new System.Drawing.Size(220, 26);
-            this.lblInvalidServer.TabIndex = 25;
-            this.lblInvalidServer.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // lblInvalidSender
             // 
             this.lblInvalidSender.ForeColor = System.Drawing.Color.Red;
@@ -403,7 +392,7 @@ namespace PKIKeyRecovery
             // lblInvalidDiscovery
             // 
             this.lblInvalidDiscovery.ForeColor = System.Drawing.Color.Red;
-            this.lblInvalidDiscovery.Location = new System.Drawing.Point(661, 95);
+            this.lblInvalidDiscovery.Location = new System.Drawing.Point(661, 80);
             this.lblInvalidDiscovery.Name = "lblInvalidDiscovery";
             this.lblInvalidDiscovery.Size = new System.Drawing.Size(220, 26);
             this.lblInvalidDiscovery.TabIndex = 21;
@@ -608,7 +597,6 @@ namespace PKIKeyRecovery
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button btnApply;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Label lblInvalidServer;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton rbtnAttachNo;

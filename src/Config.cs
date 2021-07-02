@@ -54,41 +54,41 @@ namespace PKIKeyRecovery
                     txtDiscDir.Text = conf.DestinationDirectory;
                     txtDiscDir.Enabled = false;
                 }
-            }
 
-            trkPwdLength.Value = conf.PasswordLength;
-            rbtnEmailYes.Checked = conf.UseEmail;
+                trkPwdLength.Value = conf.PasswordLength;
+                rbtnEmailYes.Checked = conf.UseEmail;
 
-            txtSmtpServer.Text = conf.SmtpServer;
-            smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
+                txtSmtpServer.Text = conf.SmtpServer;
+                smtpServerSet = Uri.CheckHostName(txtSmtpServer.Text) != UriHostNameType.Unknown;
 
-            txtSmtpUser.Text = conf.SmtpUsername;
-            txtSmtpPassword.Text = conf.SmtpPassword;
+                txtSmtpUser.Text = conf.SmtpUsername;
+                txtSmtpPassword.Text = conf.SmtpPassword;
 
-            txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
-            smtpPortSet = true;
+                txtSmtpPort.Text = Math.Abs(conf.SmtpPort).ToString();
+                smtpPortSet = true;
 
-            rbtnAttachYes.Checked = conf.AttachToEmail;
-            rbtnDeleteYes.Checked = conf.DeleteKeyAfterSending;
+                rbtnAttachYes.Checked = conf.AttachToEmail;
+                rbtnDeleteYes.Checked = conf.DeleteKeyAfterSending;
 
-            txtDiscEmail.Text = conf.DiscoveryEmail;
-            if (txtDiscEmail.Text.IsValidEmail())
-            {
-                discoveryEmailSet = true;
-            }
-            else
-            {
-                lblInvalidDiscovery.Text = Constants.InvalidEmail;
-            }
+                txtDiscEmail.Text = conf.DiscoveryEmail;
+                if (txtDiscEmail.Text.IsValidEmail())
+                {
+                    discoveryEmailSet = true;
+                }
+                else
+                {
+                    lblInvalidDiscovery.Text = Constants.InvalidEmail;
+                }
 
-            txtSenderEmail.Text = conf.SenderEmail;
-            if (txtSenderEmail.Text.IsValidEmail())
-            {
-                senderEmailSet = true;
-            }
-            else
-            {
-                lblInvalidSender.Text = Constants.InvalidEmail;
+                txtSenderEmail.Text = conf.SenderEmail;
+                if (txtSenderEmail.Text.IsValidEmail())
+                {
+                    senderEmailSet = true;
+                }
+                else
+                {
+                    lblInvalidSender.Text = Constants.InvalidEmail;
+                }
             }
         }
 
@@ -207,6 +207,7 @@ namespace PKIKeyRecovery
             Conf = new Configuration()
             {
                 DestinationDirectory = txtDestDir.Text,
+                DiscoveryDirectory = txtDiscDir.Text,
                 PasswordLength = trkPwdLength.Value,
                 UseAlphas = chkAlpha.Checked,
                 UseDigits = chkDigits.Checked,
