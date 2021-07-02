@@ -66,7 +66,7 @@ namespace PKIKeyRecovery
             smtpPortSet = true;
 
             rbtnAttachYes.Checked = conf.AttachToEmail;
-            rbtnDeleteYes.Checked = Conf.DeleteKeyAfterSending;
+            rbtnDeleteYes.Checked = conf.DeleteKeyAfterSending;
 
             txtDiscEmail.Text = conf.DiscoveryEmail;
             if (txtDiscEmail.Text.IsValidEmail())
